@@ -1,0 +1,178 @@
+{
+  "measured_on": "2026-10-17",
+  "query_file_sha256": "34e33718f308be1d2a74327a47be14422ed6b04dd42f9a29dcccf39a47e5c371",
+  "query_count": 16,
+  "answerable_queries": 14,
+  "label_provenance": {
+    "status": "unvalidated source-derived seed judgments",
+    "author": "implementation author",
+    "method": "Manually assigned target control identifiers from public NIST control titles and statements; no independent assessor review.",
+    "limits": "Incomplete qrels: other relevant controls may be unjudged. These are smoke-benchmark measurements, not validated evidence of retrieval superiority."
+  },
+  "local": {
+    "mode": "local",
+    "backend": "FaissRetriever",
+    "embedding_model": {
+      "name": "all-MiniLM-L6-v2-onnx-quint8",
+      "fingerprint": "b92798f12178e70349dfc90957b517b582a3cd59d19c105c1a7038b53454bb4c"
+    },
+    "embedding_provider": "local",
+    "vector_engine": "faiss-IndexFlatIP",
+    "answer_engine": "extractive-nlp",
+    "summary": {
+      "lexical": {
+        "recall@5": 0.7857142857142857,
+        "recall@10": 0.8214285714285714,
+        "mrr": 0.7695001077354018,
+        "ndcg@10": 0.7726806850252819,
+        "precision@5": 0.18571428571428575,
+        "precision@10": 0.10000000000000002,
+        "answerable_queries": 14,
+        "negative_queries": 2,
+        "negative_queries_returning_hits": 0,
+        "p50_ms": 93.06084999116138,
+        "p95_ms": 210.28187504271045,
+        "sequential_queries_per_second": 9.99279769235124
+      },
+      "dense": {
+        "recall@5": 0.9285714285714286,
+        "recall@10": 1.0,
+        "mrr": 0.8464285714285714,
+        "ndcg@10": 0.8779711783572617,
+        "precision@5": 0.22857142857142865,
+        "precision@10": 0.12142857142857147,
+        "answerable_queries": 14,
+        "negative_queries": 2,
+        "negative_queries_returning_hits": 1,
+        "p50_ms": 117.29029996786267,
+        "p95_ms": 171.8632499105297,
+        "sequential_queries_per_second": 8.374293663538484
+      },
+      "hybrid": {
+        "recall@5": 0.8928571428571429,
+        "recall@10": 1.0,
+        "mrr": 0.9017857142857143,
+        "ndcg@10": 0.9054637910921824,
+        "precision@5": 0.21428571428571436,
+        "precision@10": 0.12142857142857147,
+        "answerable_queries": 14,
+        "negative_queries": 2,
+        "negative_queries_returning_hits": 1,
+        "p50_ms": 237.76554997311905,
+        "p95_ms": 382.0477499975823,
+        "sequential_queries_per_second": 4.0735753910632235
+      }
+    },
+    "usage": {},
+    "resources": {
+      "chunks": 20114,
+      "store_bytes": 178512665,
+      "encoder_bytes": 140,
+      "embedding_api_calls": 0,
+      "llm_calls": 0,
+      "external_api_cost_usd": 0,
+      "cost_note": "Local CPU/storage costs unpriced. Atlas storage/index size and charges unmeasured."
+    }
+  },
+  "enterprise": {
+    "mode": "enterprise",
+    "backend": "AtlasRetriever",
+    "embedding_model": {
+      "name": "gemini-embedding-001",
+      "fingerprint": "f9630846ff3df49aa68df00c0065fbd27eab26a5d18fbefac19ca4de5719d110"
+    },
+    "embedding_provider": "gemini",
+    "vector_engine": "mongodb-atlas-vector-search",
+    "answer_engine": "gemini-grounded",
+    "summary": {
+      "lexical": {
+        "recall@5": 0.75,
+        "recall@10": 0.8214285714285714,
+        "mrr": 0.7555658627087197,
+        "ndcg@10": 0.7653813136828358,
+        "precision@5": 0.17142857142857146,
+        "precision@10": 0.10000000000000002,
+        "answerable_queries": 14,
+        "negative_queries": 2,
+        "negative_queries_returning_hits": 0,
+        "p50_ms": 523.7457000184804,
+        "p95_ms": 856.349049921846,
+        "sequential_queries_per_second": 1.7061159415201632
+      },
+      "dense": {
+        "recall@5": 0.9285714285714286,
+        "recall@10": 1.0,
+        "mrr": 0.869047619047619,
+        "ndcg@10": 0.9014482364057581,
+        "precision@5": 0.22857142857142865,
+        "precision@10": 0.12142857142857147,
+        "answerable_queries": 14,
+        "negative_queries": 2,
+        "negative_queries_returning_hits": 1,
+        "p50_ms": 1511.105649988167,
+        "p95_ms": 3061.1675750405993,
+        "sequential_queries_per_second": 0.48193118451877026
+      },
+      "hybrid": {
+        "recall@5": 0.8928571428571429,
+        "recall@10": 1.0,
+        "mrr": 0.7946428571428571,
+        "ndcg@10": 0.8433310819989419,
+        "precision@5": 0.21428571428571436,
+        "precision@10": 0.12142857142857147,
+        "answerable_queries": 14,
+        "negative_queries": 2,
+        "negative_queries_returning_hits": 1,
+        "p50_ms": 1933.3161500399,
+        "p95_ms": 2652.426399930846,
+        "sequential_queries_per_second": 0.490348260660662
+      }
+    },
+    "usage": {
+      "embedding_requests": 33,
+      "embedding_characters": 1359,
+      "embedding_billable_characters": 1205,
+      "generation_requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "thought_tokens": 0,
+      "total_tokens": 0
+    },
+    "warmup_usage": {
+      "embedding_requests": 1,
+      "embedding_characters": 23,
+      "embedding_billable_characters": 21,
+      "generation_requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "thought_tokens": 0,
+      "total_tokens": 0
+    },
+    "timed_usage": {
+      "embedding_requests": 32,
+      "embedding_characters": 1336,
+      "embedding_billable_characters": 1184,
+      "generation_requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "thought_tokens": 0,
+      "total_tokens": 0
+    },
+    "resources": {
+      "chunks": 20114,
+      "store_bytes": 343352979,
+      "encoder_bytes": 109,
+      "embedding_api_calls": 33,
+      "llm_calls": 0,
+      "external_api_cost_usd": null,
+      "cost_note": "Local CPU/storage costs unpriced. Atlas storage/index size and charges unmeasured."
+    }
+  },
+  "limitations": [
+    "Small unvalidated and incomplete relevance judgments",
+    "Retrieval metrics are not answer accuracy",
+    "One timed sequential pass; no production/concurrency/scaling claim",
+    "Initial cloud benchmark failed with AutoReconnect; reported data is the complete successful retry",
+    "Actual billing invoice and Atlas charges are unavailable; USD total remains unpriced"
+  ]
+}

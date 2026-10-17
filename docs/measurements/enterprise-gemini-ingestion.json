@@ -1,0 +1,30 @@
+{
+  "chunks": 20114,
+  "changed": true,
+  "embedded_chunks": 20114,
+  "cached_chunks": 0,
+  "usage": {
+    "embedding_requests": 629,
+    "embedding_characters": 4523265,
+    "embedding_billable_characters": 3989423,
+    "generation_requests": 0,
+    "input_tokens": 0,
+    "output_tokens": 0
+  },
+  "elapsed_seconds": 404.32015740009956,
+  "chunks_per_second": 49.74770520801901,
+  "store_bytes": 343352979,
+  "model_bytes": 109,
+  "atlas": {
+    "uploaded_chunks": 20114,
+    "sources": 2,
+    "note": "Atlas Search indexing is eventually consistent; wait for evidence before benchmarking"
+  },
+  "mode": "enterprise",
+  "embedding_model": {
+    "name": "gemini-embedding-001",
+    "fingerprint": "f9630846ff3df49aa68df00c0065fbd27eab26a5d18fbefac19ca4de5719d110"
+  },
+  "vector_engine": "mongodb-atlas-vector-search",
+  "answer_engine": "gemini-grounded"
+}

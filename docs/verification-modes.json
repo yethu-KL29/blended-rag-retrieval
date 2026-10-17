@@ -1,0 +1,157 @@
+{
+  "verified_on": "2026-10-17",
+  "local": {
+    "fresh_base_dependencies": true,
+    "torch_present": false,
+    "google_genai_present": false,
+    "cloud_variables_cleared": true,
+    "external_network_and_dns": "denied; Windows event loop may use loopback sockets",
+    "commands": [
+      {
+        "command": "python src/main.py --help",
+        "exit_code": 0,
+        "elapsed_seconds": 17.477392700035125
+      },
+      {
+        "command": "python src/main.py --mode local ingest",
+        "exit_code": 0,
+        "elapsed_seconds": 142.04849890002515
+      },
+      {
+        "command": "python src/main.py --mode local query \"How are user accounts managed?\" --release rev5 --method hybrid -k 3",
+        "exit_code": 0,
+        "elapsed_seconds": 61.44877739995718
+      },
+      {
+        "command": "python src/main.py --mode local compare ac-1 --old rev4 --new rev5",
+        "exit_code": 0,
+        "elapsed_seconds": 52.86815699993167
+      },
+      {
+        "command": "python src/main.py --mode local evaluate --output artifacts/evaluation-local.json",
+        "exit_code": 0,
+        "elapsed_seconds": 64.34152679995168
+      },
+      {
+        "command": "python src/main.py --mode local ingest",
+        "exit_code": 0,
+        "elapsed_seconds": 81.97824379999656
+      },
+      {
+        "command": "python -m pytest src/tests -q",
+        "exit_code": 0,
+        "elapsed_seconds": 46.50293329998385
+      }
+    ],
+    "tests": {
+      "passed": 48,
+      "skipped": 1,
+      "skip_reason": "Optional legacy disposable-collection Atlas integration test; dedicated Gemini namespace verified separately"
+    },
+    "cache_ingestion": {
+      "chunks": 20114,
+      "changed": true,
+      "embedded_chunks": 0,
+      "cached_chunks": 20114,
+      "usage": {},
+      "elapsed_seconds": 63.38537830009591,
+      "chunks_per_second": 317.328704812188,
+      "store_bytes": 178512665,
+      "model_bytes": 140,
+      "mode": "local",
+      "embedding_model": {
+        "name": "all-MiniLM-L6-v2-onnx-quint8",
+        "fingerprint": "b92798f12178e70349dfc90957b517b582a3cd59d19c105c1a7038b53454bb4c"
+      },
+      "vector_engine": "faiss-IndexFlatIP",
+      "answer_engine": "extractive-nlp"
+    },
+    "git_checkout_asset_verification": {
+      "model_hashes_match": true,
+      "cache_identity_matches_all_chunks": true,
+      "real_query_encoding_passed": true,
+      "git_preserves_hashed_asset_bytes": true
+    }
+  },
+  "enterprise": {
+    "readiness": {
+      "stored_chunks": 20114,
+      "active_sources": 2,
+      "search_meta": [
+        {
+          "count": {
+            "total": 20114
+          }
+        }
+      ],
+      "indexes": [
+        {
+          "name": "aintropy_nist_gemini_text_v1",
+          "status": "READY",
+          "queryable": true
+        },
+        {
+          "name": "aintropy_nist_gemini_vector_v1",
+          "status": "READY",
+          "queryable": true
+        }
+      ]
+    },
+    "cli_compare_both_releases": true,
+    "idempotence": {
+      "chunks": 20114,
+      "changed": false,
+      "embedded_chunks": 0,
+      "cached_chunks": 20114,
+      "usage": {
+        "embedding_requests": 0,
+        "embedding_characters": 0,
+        "embedding_billable_characters": 0,
+        "generation_requests": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "thought_tokens": 0,
+        "total_tokens": 0
+      },
+      "elapsed_seconds": 19.06607850000728,
+      "atlas": {
+        "uploaded_chunks": 0,
+        "sources": 2,
+        "note": "Atlas Search indexing is eventually consistent; wait for evidence before benchmarking"
+      },
+      "mode": "enterprise",
+      "embedding_model": {
+        "name": "gemini-embedding-001",
+        "fingerprint": "f9630846ff3df49aa68df00c0065fbd27eab26a5d18fbefac19ca4de5719d110"
+      },
+      "vector_engine": "mongodb-atlas-vector-search",
+      "answer_engine": "gemini-grounded",
+      "embedding_provider": "gemini",
+      "billing_note": "Submitted characters counted; billable characters available only when provider reports metadata; USD unpriced"
+    },
+    "api": {
+      "health_status": 200,
+      "compare_status": 200,
+      "query_status": 200,
+      "query_mode": "enterprise",
+      "actual_chat_model": "gemini-3.1-flash-lite",
+      "citation_count": 2
+    }
+  },
+  "review": {
+    "lens": "independent quick review",
+    "findings_fixed": [
+      "Unknown billing usage in ingestion is null",
+      "API concurrent requests serialize for correct usage attribution"
+    ],
+    "deferred": []
+  },
+  "untested": [
+    "Docker build",
+    "Linux runtime",
+    "Production load/scalability",
+    "Independent relevance-label validation",
+    "Invoice-level total cloud cost",
+    "Reranking"
+  ]
+}

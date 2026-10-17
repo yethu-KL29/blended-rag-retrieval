@@ -1,0 +1,11 @@
+{
+  "file": "corpus-minilm.npz",
+  "sha256": "0cb870e624cc3eb625c4b8e9167cb1fabdef8760fb13cef1acee1f32af8643ce",
+  "bytes": 29656389,
+  "chunks": 20114,
+  "dimensions": 384,
+  "model_fingerprint": "b92798f12178e70349dfc90957b517b582a3cd59d19c105c1a7038b53454bb4c",
+  "generated_by": "python src/main.py --mode local export-cache",
+  "source": "Real full-corpus ONNX encoding; docs/measurements/local-onnx-ingestion.json",
+  "identity_validation": "Archive metadata binds complete ordered chunks/source hashes and encoder fingerprint; never contains query rankings or answers."
+}

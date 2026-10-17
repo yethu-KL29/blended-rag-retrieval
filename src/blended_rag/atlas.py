@@ -15,6 +15,9 @@ from .retrieval import rrf
 
 
 class AtlasRetriever:
+    mode = "legacy"
+    vector_engine = "mongodb-atlas-vector-search"
+    answer_engine = "extractive-nlp"
     def __init__(self, store: LocalStore):
         uri = os.getenv("MONGODB_URI")
         if not uri:
@@ -117,7 +120,7 @@ class AtlasRetriever:
                 "must": [{"text": {"query": query, "path": "search_text"}}], "filter": constraints}}},
                 {"$limit": k}, {"$set": {"score": {"$meta": "searchScore"}}}]
         else:
-            vector = self.encoder.encode([query])[0].tolist()
+            vector = (self.encoder.encode_query(query) if hasattr(self.encoder, "encode_query") else self.encoder.encode([query])[0]).tolist()
             pipeline = [{"$vectorSearch": {"index": self.vector_index, "path": "embedding", "queryVector": vector,
                          "numCandidates": max(100, k * 20), "limit": k, "filter": active}},
                         {"$set": {"score": {"$meta": "vectorSearchScore"}}}]
@@ -128,3 +131,6 @@ class AtlasRetriever:
 
     def close(self):
         self.client.close()
+        provider_client = getattr(self.encoder, "_client", None)
+        if provider_client is not None:
+            provider_client.close()

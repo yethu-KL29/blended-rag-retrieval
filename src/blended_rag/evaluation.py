@@ -10,6 +10,7 @@ import numpy as np
 
 from .dataset import DATA, manifest
 from .models import digest
+from .providers import provenance, usage_snapshot, usage_delta
 
 
 def metrics(ranking: list[str], relevant: dict[str, int]) -> dict:
@@ -33,8 +34,10 @@ def evaluate(retriever, store, output="artifacts/evaluation.json", queries=DATA 
     if not benchmark["queries"]:
         raise ValueError("Benchmark must contain at least one query")
     first = benchmark["queries"][0]
+    before = usage_snapshot(retriever)
     # MiniLM loads lazily on its first dense request; keep that cold start outside timing.
     retriever.search(first["query"], "dense", 1, first["filters"])
+    after_warmup = usage_snapshot(retriever)
     rows, summaries = [], {}
     for method in ["lexical", "dense", "hybrid"]:
         method_rows = []
@@ -61,7 +64,13 @@ def evaluate(retriever, store, output="artifacts/evaluation.json", queries=DATA 
         summaries[method].update({"p50_ms": float(np.percentile(times, 50)), "p95_ms": float(np.percentile(times, 95)),
                                   "sequential_queries_per_second": len(times) / (sum(times) / 1000)})
     state = store.read()
+    usage = usage_delta(before, usage_snapshot(retriever))
+    enterprise = getattr(retriever, "mode", None) == "enterprise"
     report = {"backend": type(retriever).__name__, "model": retriever.model,
+              **provenance(retriever), "usage": usage,
+              "warmup_usage": usage_delta(before, after_warmup),
+              "timed_usage": usage_delta(after_warmup, usage_snapshot(retriever)),
+              "answer_validation": "Retrieval-only evaluation; recall is not answer accuracy. Qrels are small and unvalidated.",
               "label_provenance": benchmark["label_provenance"], "query_file_sha256": digest(raw),
               "query_count": len(benchmark["queries"]), "corpus": manifest(),
               "python": platform.python_version(), "platform": platform.platform(),
@@ -69,10 +78,12 @@ def evaluate(retriever, store, output="artifacts/evaluation.json", queries=DATA 
               "retrieval_unit": "release:control_id; ranked chunk pool of 100 collapsed to unique controls",
               "resources": {"chunks": len(state["chunks"]), "store_bytes": store.path.stat().st_size,
                             "encoder_bytes": (store.directory / state["model_file"]).stat().st_size,
-                            "embedding_api_calls": 0, "llm_calls": 0, "external_api_cost_usd": 0,
+                            "embedding_api_calls": usage.get("embedding_requests", 0), "llm_calls": usage.get("generation_requests", 0),
+                            "external_api_cost_usd": None if enterprise else 0,
                             "cost_note": "Local CPU/storage costs unpriced. Atlas storage/index size and charges unmeasured."},
               "summary": summaries, "per_query": rows}
     target = Path(output)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(report, indent=2, allow_nan=False), encoding="utf-8")
-    return {"output": str(target), "summary": summaries, "label_provenance": benchmark["label_provenance"]}
+    return {"output": str(target), "summary": summaries, "label_provenance": benchmark["label_provenance"],
+            **provenance(retriever), "usage": usage, "warmup_usage": report["warmup_usage"]}

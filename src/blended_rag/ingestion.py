@@ -7,6 +7,7 @@ import tempfile
 import time
 from dataclasses import asdict
 from pathlib import Path
+from types import SimpleNamespace
 
 import joblib
 import numpy as np
@@ -15,6 +16,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 
 from .models import Chunk, digest
+from .providers import OnnxEncoder, GeminiEncoder, usage_snapshot
 
 
 def parse_catalog(source: dict, document: dict, max_words: int = 180) -> list[Chunk]:
@@ -87,6 +89,7 @@ class NeuralEncoder:
     name = "sentence-transformers/all-MiniLM-L6-v2"
     revision = "1110a243fdf4706b3f48f1d95db1a4f5529b4d41"
     dimensions = 384
+    fixed_model = True
     fingerprint = digest(name + "@" + revision + "|normalize=true")
 
     def fit(self, chunks):
@@ -122,18 +125,22 @@ class LocalStore:
             raise ValueError("No local index; run: python src/main.py ingest")
         return json.loads(self.path.read_text(encoding="utf-8"))
 
-    def ingest(self, chunks: list[Chunk], encoder_kind="lsa") -> dict:
+    def ingest(self, chunks: list[Chunk], encoder_kind="lsa", cache_path=None) -> dict:
         start = time.perf_counter()
         if not chunks or len({c.chunk_id for c in chunks}) != len(chunks):
             raise ValueError("Ingestion needs unique nonempty chunks")
         self.directory.mkdir(parents=True, exist_ok=True)
         previous = self.read() if self.path.exists() else None
-        encoder_class = {"lsa": Encoder, "minilm": NeuralEncoder}.get(encoder_kind)
+        encoder_class = {"lsa": Encoder, "minilm": NeuralEncoder, "onnx": OnnxEncoder, "gemini": GeminiEncoder}.get(encoder_kind)
         if encoder_class is None:
-            raise ValueError("encoder must be lsa or minilm")
-        if previous and (previous["model_name"] != encoder_class.name or
-                         (encoder_kind == "minilm" and previous["model_fingerprint"] != encoder_class.fingerprint)):
+            raise ValueError("encoder must be lsa, minilm, onnx or gemini")
+        encoder = encoder_class()
+        fixed = getattr(encoder, "fixed_model", False)
+        if previous and (previous["model_name"] != encoder.name or
+                         (fixed and previous["model_fingerprint"] != encoder.fingerprint)):
             raise ValueError("Embedding model mismatch; use a new --store directory")
+        if previous:
+            self.validate_state(previous)
         old = {c["chunk_id"]: c for c in previous["chunks"]} if previous else {}
         incoming_sources = {(c.source_id, c.release) for c in chunks}
         incoming = {c.chunk_id: asdict(c) for c in chunks}
@@ -141,11 +148,18 @@ class LocalStore:
         merged = {**retained, **incoming}
         if previous and merged == old:
             return {"chunks": len(old), "changed": False, "embedded_chunks": 0,
+                    "cached_chunks": len(old), "usage": usage_snapshot(SimpleNamespace(encoder=encoder)),
                     "elapsed_seconds": time.perf_counter() - start}
         ordered = [Chunk(**c) for _, c in sorted(merged.items())]
         # Fitted LSA is corpus-dependent. Every changed corpus gets its own model generation.
-        encoder = encoder_class().fit(ordered)
-        if encoder_kind == "minilm" and previous:
+        encoder.fit(ordered)
+        bundled = None
+        if fixed and cache_path and Path(cache_path).exists():
+            bundled = self.load_cache(cache_path, ordered, encoder)
+        if bundled is not None:
+            vectors, embedded_count = bundled, 0
+        elif fixed and previous:
+            self.validate_state(previous)
             cached = {c["chunk_id"]: (c, v) for c, v in zip(previous["chunks"], previous["vectors"], strict=True)}
             vectors = [None] * len(ordered)
             pending = []
@@ -171,6 +185,17 @@ class LocalStore:
         state = {"model_name": encoder.name, "model_fingerprint": encoder.fingerprint,
                  "model_file": model_file, "dimensions": encoder.dimensions,
                  "chunks": [asdict(c) for c in ordered], "vectors": vectors.tolist()}
+        if encoder_kind == "onnx":
+            import faiss
+            prepared = np.ascontiguousarray(vectors, dtype=np.float32)
+            faiss.normalize_L2(prepared)
+            index = faiss.IndexFlatIP(encoder.dimensions)
+            index.add(prepared)
+            index_file = f"faiss-{digest(json.dumps(state, sort_keys=True))}.index"
+            faiss.write_index(index, str(self.directory / index_file))
+            state["faiss"] = {"file": index_file, "sha256": digest((self.directory / index_file).read_bytes()),
+                              "model_fingerprint": encoder.fingerprint, "dimensions": encoder.dimensions,
+                              "chunk_ids": [c.chunk_id for c in ordered], "metric": "normalized-inner-product"}
         # Atomic pointer/state replacement; old store remains usable on preparation failures.
         handle, temporary = tempfile.mkstemp(dir=self.directory, suffix=".tmp")
         try:
@@ -182,13 +207,53 @@ class LocalStore:
                 os.unlink(temporary)
         elapsed = time.perf_counter() - start
         return {"chunks": len(ordered), "changed": True, "embedded_chunks": embedded_count,
+                "cached_chunks": len(ordered) - embedded_count, "usage": usage_snapshot(SimpleNamespace(encoder=encoder)),
                 "elapsed_seconds": elapsed, "chunks_per_second": len(ordered) / elapsed,
                 "store_bytes": self.path.stat().st_size, "model_bytes": model_path.stat().st_size}
 
     def encoder(self):
         state = self.read()
+        self.validate_state(state)
         # Only load locally generated trusted artifacts, never a user upload.
         encoder = joblib.load(self.directory / state["model_file"])
         if encoder.fingerprint != state["model_fingerprint"] or encoder.name != state["model_name"]:
             raise ValueError("Embedding model mismatch")
         return encoder
+
+    @staticmethod
+    def validate_state(state):
+        vectors = np.asarray(state["vectors"])
+        if vectors.shape != (len(state["chunks"]), state["dimensions"]) or not np.isfinite(vectors).all():
+            raise ValueError("Embedding artifact count, dimensions or finite-value mismatch")
+
+    @staticmethod
+    def cache_identity(chunks, encoder):
+        return {"model_fingerprint": encoder.fingerprint, "dimensions": encoder.dimensions,
+                "inputs": [digest(json.dumps(asdict(c), sort_keys=True)) for c in chunks]}
+
+    @classmethod
+    def load_cache(cls, path, chunks, encoder):
+        with np.load(path, allow_pickle=False) as archive:
+            metadata = json.loads(str(archive["metadata"]))
+            if metadata != cls.cache_identity(chunks, encoder):
+                # Corpus changes require real encoding; incompatible models must be explicitly rejected.
+                if metadata.get("model_fingerprint") != encoder.fingerprint:
+                    raise ValueError("Bundled cache model mismatch")
+                return None
+            vectors = archive["vectors"]
+        if vectors.shape != (len(chunks), encoder.dimensions) or not np.isfinite(vectors).all():
+            raise ValueError("Bundled cache count, dimensions or finite-value mismatch")
+        return vectors
+
+    def export_cache(self, path):
+        state = self.read()
+        self.validate_state(state)
+        encoder = self.encoder()
+        if not getattr(encoder, "fixed_model", False):
+            raise ValueError("Cache export requires a fixed embedding model")
+        chunks = [Chunk(**c) for c in state["chunks"]]
+        target = Path(path)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        np.savez_compressed(target, vectors=np.asarray(state["vectors"], dtype=np.float32),
+                            metadata=json.dumps(self.cache_identity(chunks, encoder), sort_keys=True))
+        return {"cache": str(target), "chunks": len(chunks), "model_fingerprint": encoder.fingerprint}

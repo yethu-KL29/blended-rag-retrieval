@@ -1,37 +1,46 @@
-# Compliance retrieval: design and results
+# Enterprise compliance retrieval
+
+MongoDB Atlas plus Gemini is the primary architecture. The credential-free grading mode uses BM25, bundled quantized ONNX MiniLM, FAISS and RRF. Read the explicit [architecture decision, configuration and execution commands](architecture-modes.md); [current independent measurements](mode-benchmarks.md) distinguish these modes from the preserved historical experiments.
 
 ```mermaid
 flowchart LR
-  N[Pinned NIST OSCAL] --> P[Hash check / structural chunks]
-  P --> E[Embedding preparation]
-  E --> L[Atomic local store]
-  E --> A[Atlas chunks / generation pointers]
-  L --> R[BM25 / dense / RRF]
-  A --> R
-  R --> Q[Cited CLI/API evidence and comparison]
-  R --> V[Frozen benchmark / actual rankings]
+  N[Pinned NIST catalogs] --> P[Hash verification and structural chunks]
+  P --> G[Gemini document embeddings]
+  G --> A[Atlas lexical and vector indexes]
+  A --> E[RRF and Gemini cited answer]
+  P --> M[Bundled MiniLM or validated corpus cache]
+  M --> F[Local BM25 and FAISS]
+  F --> L[RRF and cited NLP sentences]
+  A --> V[Separate retrieval evaluations]
+  F --> V
 ```
 
-**Evidence and provenance.** Public NIST Rev4 (`2015-01-22`) and Rev5 (`5.2.0`, including assessment procedures) catalogs are bundled as gzip; immutable URLs, SHA256 and versions are in `src/data/manifest.json`. The [pinned NIST repository](https://github.com/usnistgov/oscal-content/tree/78650f02ad9321bb7b817846f8fbd4f2bcd620de) [license](https://github.com/usnistgov/oscal-content/blob/78650f02ad9321bb7b817846f8fbd4f2bcd620de/LICENSE.md) is US public domain/worldwide CC0. Attribution: National Institute of Standards and Technology, SP 800-53 OSCAL catalogs. Structural parsing traverses groups and nested controls, preserving control identifiers, section paths, parameters, releases, URLs and hashes; group records are not indexed separately. Metadata-only controls retain cited status and links, including withdrawal/incorporation evidence. Prose splits at 180 words without crossing sections. Organization-defined parameter definitions remain separate cited sections; values are never invented.
+## Documents and chunking
 
-**Architecture and tradeoffs.** The enterprise KMS reference informed filtered Atlas pipelines and batched preparation; application state, providers and private configuration were not copied. [IBM Blended-RAG](https://github.com/ibm-self-serve-assets/Blended-RAG) informed the dense/lexical comparison. IBM's Elasticsearch ELSER mappings cannot be reused as MongoDB indexes; BM25 is not learned sparse retrieval. Local BM25 uses k1=1.5/b=.75; default dense is seeded normalized TF-IDF/SVD64, a corpus-fitted LSA baseline. Pinned MiniLM has now been executed locally with normalized 384-dimensional vectors and incremental reuse. It truncates input at its configured model sequence limit; embeddings do not change the cited source text. Client RRF (constant 60, up to 100 candidates per retriever) provides Atlas compatibility without claiming native `$rankFusion` support, ELSER parity or reranker results. Identical metadata constraints apply within both Atlas retrieval stages.
+Two public NIST SP 800-53 OSCAL catalogs provide 20,114 chunks from 922 Rev4 and 1,196 Rev5 control records. These are real security standards, not invented corporate 2024/2025 policies. Rev4 uses catalog version `2015-01-22`; Rev5 uses `5.2.0`, including assessment procedures. Manifest URLs, versions and SHA256 values are in `src/data/manifest.json`. The [pinned NIST source repository](https://github.com/usnistgov/oscal-content/tree/78650f02ad9321bb7b817846f8fbd4f2bcd620de) has a [US public-domain/worldwide CC0 license](https://github.com/usnistgov/oscal-content/blob/78650f02ad9321bb7b817846f8fbd4f2bcd620de/LICENSE.md).
 
-**Updates and deployment.** Embeddings are prepared before atomic local store replacement. Identical reingestion embeds zero chunks; replacing one source/release preserves other releases. LSA changes refit the corpus and require a fresh Atlas collection/model generation. Atlas upserts deterministic source-scoped generation IDs in batches before switching each source pointer; failures leave old pointers usable. A multi-source batch is not one transaction; retired generations need a retention policy, and Search propagation may temporarily hide new evidence. Use serialized source updates in a production ingestion queue; Service Bus is optional. Docker runs the local FastAPI service; Atlas requires externally provisioned Search/Vector Search and configured index permissions. The API is an internal demo: add authenticated gateway/document access rules before enterprise exposure. The local JSON/LSA store is not designed for millions of documents; fixed-model workers and Atlas scale independently after distributed ingestion coordination is added.
+The parser traverses nested groups and controls, preserves exact control IDs and section paths, and splits prose at 180 words without crossing sections. Parameter definitions remain separate; organizational parameter values are never invented. Metadata-only controls preserve withdrawal/incorporation evidence. Every chunk carries release, source URL and source/content hashes.
 
-**Benchmark interpretation.** Sixteen frozen questions include identifiers, paraphrases, multi-control questions, release/source filters and two negatives. Labels are source-derived seeds with **no independent human validation** and incomplete relevance judgments. Results demonstrate reproducibility, not proven superiority. Each method retrieves 100 chunks and collapses them into unique `release:control_id` rankings. Positive-query means exclude the two empty-qrel negatives; negative return counts are separate. Recall@5/10, MRR, NDCG@10, Precision@5/10 and p50/p95 come from actual rankings. Latency uses an untimed dense warmup followed by one timed pass, including filtering/fusion but excluding model loading, ingestion and API generation. Sequential throughput is not concurrent capacity. Run `python src/main.py evaluate --output artifacts/evaluation.json` for complete per-query evidence, environment, corpus/model/query hashes and resource measurements.
+## Retrieval and answers
 
-**Measured local comparison.** All 20,114 chunks from 922 Rev4 and 1,196 Rev5 control records were encoded with pinned MiniLM and evaluated on the unchanged queries alongside LSA. First neural ingestion took 573.16 seconds (35.09 chunks/s), including lazy model initialization/download during preparation. Its local JSON store is 177,162,601 bytes; the 60-byte encoder pickle is a pointer and excludes cached model assets. LSA's store/encoder were 41,868,827 / 4,133,778 bytes. Both models ran sequentially with four CPU threads and an untimed warmup. Actual results:
+Enterprise mode prepares Gemini `RETRIEVAL_DOCUMENT` embeddings and embeds questions with `RETRIEVAL_QUERY`. Atlas Search performs lexical matching with its BM25 scoring; Atlas Vector Search uses 768-dimensional cosine similarity. Local BM25 uses k1=1.5 and b=0.75. Local dense retrieval uses the pinned 384-dimensional MiniLM quantized ONNX representation with attention-mask mean pooling, normalization and FAISS IndexFlatIP. Metadata filters apply before top-k in both modes.
 
-| Method | Recall@5 | Recall@10 | MRR | NDCG@10 | P@5 | P@10 | p50 / p95 ms |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| BM25 | 0.7857 | 0.8214 | 0.7695 | 0.7727 | 0.1857 | 0.1000 | 83.7 / 155.6 |
-| LSA | 0.8214 | 0.8214 | 0.6917 | 0.7054 | 0.1857 | 0.0929 | 36.6 / 56.7 |
-| BM25 + LSA | 0.8571 | 0.8571 | 0.8095 | 0.7849 | 0.2000 | 0.1000 | 128.0 / 183.3 |
-| MiniLM | 0.9286 | 1.0000 | 0.8286 | 0.8722 | 0.2286 | 0.1214 | 51.3 / 116.7 |
-| BM25 + MiniLM | 0.8929 | 1.0000 | 0.8899 | 0.9035 | 0.2143 | 0.1214 | 139.2 / 181.4 |
+Both pipelines combine ranked lists using client RRF, constant 60 and up to 100 candidates per component. This follows the dense/lexical comparison in [IBM Blended-RAG](https://github.com/ibm-self-serve-assets/Blended-RAG); it does not claim ELSER, native MongoDB rank fusion or tested reranking. The existing KMS POC informed Atlas design; new collection/index namespaces isolate this experiment from its data.
 
-MiniLM and its hybrid found all labeled expected controls within the top 10 on 14 answerable seeds. Hybrid improved NDCG but had lower Recall@5 than dense MiniLM. These small, unvalidated judgments do not establish general accuracy. Both neural configurations returned hits for the unrelated recipe question; retrieval needs a separate answerability check. External embedding/LLM API cost was $0; CPU, storage and model download costs are unpriced. `experiment-summary.json` records model revision, resource sizes and package versions; `measurements/*.json.gz` preserves all actual rankings. The earlier baseline is retained in `benchmark-summary.json`.
+Local answers select relevant exact source sentences and append citations. This is an NLP answer presentation layer, with an uncalibrated lexical abstention heuristic. Enterprise uses Gemini structured synthesis over bounded excerpts and validates citation IDs. Neither citation validation nor similarity proves semantic entailment. Version comparison returns cited excerpts and exact textual diffs; it does not infer legal or operational changes.
 
-**Atlas status.** The authorized POC connection configuration was read privately. Three connection attempts failed: DNS resolves three public nodes, but TCP connections time out before TLS/authentication, including a retry with explicit CA certificates. The dedicated planned collection is `aintropy_blended_nist_minilm_20261017_v1` (plus `_sources`), with `aintropy_nist_text_v1` and `aintropy_nist_minilm_vector_v1` indexes. No remote collection/index was created or changed. VPN, outbound connectivity or Atlas Network Access must be resolved before live BM25/vector/fusion results can be measured. No Atlas, native MongoDB fusion, index-size or Docker results are claimed. All 33 deterministic tests pass; the live Atlas test skips.
+## Evaluation protocol
 
-**Limits and failures.** Extractive answers quote evidence; similarity alone does not prove that it answers a question. Empty retrieval returns insufficient evidence, but dense retrieval may return unrelated excerpts for out-of-domain questions. Mixed-release answers carry a warning. Comparisons show exact textual differences and absent controls, without inferring legal/policy changes. No LLM synthesis, reranker, tenant authorization, monitoring exporter, distributed locking or validated benchmark is implemented. Prioritize independent qrel review and live Atlas integration before drawing quality/scaling conclusions.
+The same frozen 16 questions and source/query hashes are used for each mode. Fourteen have positive source-derived relevance labels; two are negatives. Labels are small, incomplete and independently unvalidated. Each method retrieves 100 chunks, collapses them to unique `release:control_id`, then calculates Recall@5/10, MRR, NDCG@10 and precision. A Recall@10 of 1.0 means all labeled controls appeared in that ranking on these seeds; it does not mean answers are 100% correct.
+
+One untimed dense warmup precedes a single sequential timed pass. Latency includes retrieval, filters and fusion, but excludes ingestion, model loading and answer generation. Reports retain all rankings, evidence hashes, negative-return counts, p50/p95, usage and environment. Warmup calls are counted separately. Results are reproducibility evidence, not a statistical superiority claim or concurrent load test. See [mode-benchmarks.md](mode-benchmarks.md) for actual separate results and costs.
+
+The preserved `benchmark-summary.json`, `experiment-summary.json`, `measurements/local-lsa.json.gz` and `measurements/local-minilm.json.gz` describe earlier LSA and full-precision MiniLM experiments. They remain intact and are not Atlas/Gemini or quantized ONNX measurements.
+
+## Updates, scale and deployment
+
+Fixed-model ingestion reuses unchanged vectors and preserves other source/releases. The bundled corpus cache is generated by actual MiniLM encoding and bound to complete ordered source/chunk records and the model fingerprint. Query encoding and retrieval always execute. Failed preparation preserves the previous local store pointer. Atlas writes deterministic generation-scoped chunks before switching each source pointer; a multi-source upload is not one transaction. Search propagation remains eventually consistent. Retired generations require retention cleanup.
+
+For production, serialize source updates with distributed coordination; a Service Bus ingestion queue is optional and is not required by this working CLI/API. Scale embedding workers and Atlas separately. The local JSON store and filtered temporary FAISS subsets target this assessment corpus, not millions of documents. The single-process demo API serializes query operations to keep tokenizer and usage attribution safe. Production requires authentication, document authorization, operational monitoring and measured concurrent capacity.
+
+`Dockerfile` builds and serves local mode using the bundled assets. Dependency installation requires a package source; application runtime does not require cloud services or downloads. Exact CLI/API, Docker and optional cloud instructions are linked above. A Docker engine/build and Linux runtime must be independently verified before claiming those executions.

@@ -1,0 +1,6 @@
+# Model/cache hashes bind exact upstream bytes, including on Windows checkouts.
+src/assets/minilm/model.onnx -text
+src/assets/minilm/tokenizer.json -text
+src/assets/minilm/config.json -text
+src/assets/minilm/sentence_bert_config.json -text
+src/assets/corpus-minilm.npz -text

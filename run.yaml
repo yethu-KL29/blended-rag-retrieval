@@ -2,11 +2,11 @@ setup_commands:
   - "python -m pip install -r requirements.txt"
 run_commands:
   - "python src/main.py --help"
-  - "python src/main.py ingest"
-  - "python src/main.py query \"How are user accounts managed?\" --release rev5 --method hybrid -k 3"
-  - "python src/main.py compare ac-1 --old rev4 --new rev5"
-  - "python src/main.py evaluate --output artifacts/evaluation.json"
-  - "python src/main.py ingest"
+  - "python src/main.py --mode local ingest"
+  - "python src/main.py --mode local query \"How are user accounts managed?\" --release rev5 --method hybrid -k 3"
+  - "python src/main.py --mode local compare ac-1 --old rev4 --new rev5"
+  - "python src/main.py --mode local evaluate --output artifacts/evaluation-local.json"
+  - "python src/main.py --mode local ingest"
 test_commands:
   - "python -m pytest src/tests -q"
-notes: "Python 3.11-3.13 recommended in an isolated virtual environment. Bundled pinned NIST corpus; offline LSA needs no credentials, model download or GPU. Atlas and MiniLM need separate explicit setup. Benchmark labels are unvalidated source-derived seeds. Run from repository root."
+notes: "Python 3.11-3.13. Default grading mode uses bundled ONNX MiniLM, BM25, FAISS and RRF without credentials, network, PyTorch or runtime downloads. Corpus cache is validated against complete ordered source records and model fingerprints; mismatches require real encoding. Enterprise Atlas/Gemini is explicit optional setup. Qrels are unvalidated seeds; retrieval recall is not answer accuracy. Run from repository root."

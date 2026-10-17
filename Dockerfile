@@ -3,6 +3,6 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY src ./src
-RUN python src/main.py ingest
+RUN python src/main.py --mode local ingest
 EXPOSE 8000
-CMD ["python", "src/main.py", "serve", "--host", "0.0.0.0"]
+CMD ["python", "src/main.py", "--mode", "local", "serve", "--host", "0.0.0.0"]

@@ -1,0 +1,11 @@
+{
+  "chunks": 20114,
+  "changed": true,
+  "embedded_chunks": 20114,
+  "cached_chunks": 0,
+  "usage": {},
+  "elapsed_seconds": 1082.1750843999907,
+  "chunks_per_second": 18.58664119138555,
+  "store_bytes": 178512665,
+  "model_bytes": 140
+}

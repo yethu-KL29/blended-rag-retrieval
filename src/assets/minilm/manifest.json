@@ -1,0 +1,37 @@
+{
+  "model": "sentence-transformers/all-MiniLM-L6-v2",
+  "revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+  "representation": "ONNX quint8 AVX2 export; attention-mask mean pooling and L2 normalization",
+  "dimensions": 384,
+  "license": "apache-2.0",
+  "files": [
+    {
+      "file": "model.onnx",
+      "upstream_path": "onnx/model_quint8_avx2.onnx",
+      "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/onnx/model_quint8_avx2.onnx",
+      "sha256": "b941bf19f1f1283680f449fa6a7336bb5600bdcd5f84d10ddc5cd72218a0fd21",
+      "bytes": 23046789
+    },
+    {
+      "file": "tokenizer.json",
+      "upstream_path": "tokenizer.json",
+      "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/tokenizer.json",
+      "sha256": "be50c3628f2bf5bb5e3a7f17b1f74611b2561a3a27eeab05e5aa30f411572037",
+      "bytes": 466247
+    },
+    {
+      "file": "config.json",
+      "upstream_path": "config.json",
+      "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/config.json",
+      "sha256": "953f9c0d463486b10a6871cc2fd59f223b2c70184f49815e7efbcab5d8908b41",
+      "bytes": 612
+    },
+    {
+      "file": "sentence_bert_config.json",
+      "upstream_path": "sentence_bert_config.json",
+      "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/sentence_bert_config.json",
+      "sha256": "fc1993fde0a95c24ec6c022539d41cf6e2f7c9721e5415d6fb6897472a9cd4b7",
+      "bytes": 53
+    }
+  ]
+}

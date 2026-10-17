@@ -1,0 +1,59 @@
+{
+  "answer": "Backup information is tested to verify information integrity [1] and media reliability [3].",
+  "mode": "enterprise",
+  "embedding_model": {
+    "name": "gemini-embedding-001",
+    "fingerprint": "f9630846ff3df49aa68df00c0065fbd27eab26a5d18fbefac19ca4de5719d110"
+  },
+  "embedding_provider": "gemini",
+  "vector_engine": "mongodb-atlas-vector-search",
+  "answer_engine": "gemini-grounded",
+  "billing_note": "Submitted characters counted; billable characters available only when provider reports metadata; USD unpriced",
+  "chat_model": "gemini-3.1-flash-lite",
+  "actual_chat_model": "gemini-3.1-flash-lite",
+  "usage": {
+    "embedding_requests": 1,
+    "embedding_characters": 55,
+    "embedding_billable_characters": 48,
+    "generation_requests": 1,
+    "input_tokens": 322,
+    "output_tokens": 48,
+    "thought_tokens": 0,
+    "total_tokens": 370
+  },
+  "answer_validation": "Citation IDs validated; semantic entailment unvalidated",
+  "citations": [
+    {
+      "citation_id": 1,
+      "chunk_id": "ad9845eae3fd897d7dbfbeb3ca53761e9bc7d62d3deee7111d5999f48ac24314",
+      "source_id": "nist-800-53",
+      "release": "rev5",
+      "control_id": "cp-9.1",
+      "section_id": "cp-9.1_obj-2:0",
+      "title": "Testing for Reliability and Integrity",
+      "text": "backup information is tested {{ insert: param, cp-09.01_odp.02 }} to verify information integrity.",
+      "source_url": "https://raw.githubusercontent.com/usnistgov/oscal-content/78650f02ad9321bb7b817846f8fbd4f2bcd620de/nist.gov/SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json",
+      "source_hash": "01f37cf90ea99d92242c936cbfbdebcc338eef1f71454e2acac36cc56e9bc062",
+      "content_hash": "9959d4e4475ff70df34323680f51fa181d93272dd7239319094ce29e6afefd89",
+      "score": 0.03128054740957967
+    },
+    {
+      "citation_id": 3,
+      "chunk_id": "01dd21eb00793b86d47f19d015f1be60a20d1ae1bab842e7f339dd893fade8f9",
+      "source_id": "nist-800-53",
+      "release": "rev5",
+      "control_id": "cp-9.1",
+      "section_id": "cp-9.1_obj-1:0",
+      "title": "Testing for Reliability and Integrity",
+      "text": "backup information is tested {{ insert: param, cp-09.01_odp.01 }} to verify media reliability;",
+      "source_url": "https://raw.githubusercontent.com/usnistgov/oscal-content/78650f02ad9321bb7b817846f8fbd4f2bcd620de/nist.gov/SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json",
+      "source_hash": "01f37cf90ea99d92242c936cbfbdebcc338eef1f71454e2acac36cc56e9bc062",
+      "content_hash": "08aed0f05dc59b6e4fb56c0ba8f9cfc58b17f29621145d55b44c006b60693637",
+      "score": 0.029631255487269532
+    }
+  ],
+  "releases": [
+    "rev5"
+  ],
+  "notice": ""
+}
