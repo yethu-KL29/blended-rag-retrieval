@@ -30,6 +30,11 @@ def metrics(ranking: list[str], relevant: dict[str, int]) -> dict:
 def evaluate(retriever, store, output="artifacts/evaluation.json", queries=DATA / "queries.json"):
     raw = Path(queries).read_bytes()
     benchmark = json.loads(raw)
+    if not benchmark["queries"]:
+        raise ValueError("Benchmark must contain at least one query")
+    first = benchmark["queries"][0]
+    # MiniLM loads lazily on its first dense request; keep that cold start outside timing.
+    retriever.search(first["query"], "dense", 1, first["filters"])
     rows, summaries = [], {}
     for method in ["lexical", "dense", "hybrid"]:
         method_rows = []
@@ -60,7 +65,7 @@ def evaluate(retriever, store, output="artifacts/evaluation.json", queries=DATA 
               "label_provenance": benchmark["label_provenance"], "query_file_sha256": digest(raw),
               "query_count": len(benchmark["queries"]), "corpus": manifest(),
               "python": platform.python_version(), "platform": platform.platform(),
-              "measurement": "Single-process warm index, one timed pass; model load/ingestion excluded. No concurrency load test.",
+              "measurement": "One untimed dense warmup, then one single-process timed pass; model load/ingestion excluded. No concurrency load test.",
               "retrieval_unit": "release:control_id; ranked chunk pool of 100 collapsed to unique controls",
               "resources": {"chunks": len(state["chunks"]), "store_bytes": store.path.stat().st_size,
                             "encoder_bytes": (store.directory / state["model_file"]).stat().st_size,

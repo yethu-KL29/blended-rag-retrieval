@@ -11,3 +11,4 @@ _bmad/
 artifacts/project-context*
 artifacts/evaluation*.json
 artifacts/verification*.json
+artifacts/atlas-preflight.json

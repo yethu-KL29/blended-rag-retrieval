@@ -1,0 +1,248 @@
+{
+  "corpus_chunks": 20114,
+  "query_file_sha256": "34e33718f308be1d2a74327a47be14422ed6b04dd42f9a29dcccf39a47e5c371",
+  "query_count": 16,
+  "answerable_queries": 14,
+  "negative_queries": 2,
+  "label_provenance": {
+    "status": "unvalidated source-derived seed judgments",
+    "author": "implementation author",
+    "method": "Manually assigned target control identifiers from public NIST control titles and statements; no independent assessor review.",
+    "limits": "Incomplete qrels: other relevant controls may be unjudged. These are smoke-benchmark measurements, not validated evidence of retrieval superiority."
+  },
+  "execution": "Both models measured sequentially on CPU with OMP_NUM_THREADS=4 and MKL_NUM_THREADS=4; untimed dense warmup precedes timing.",
+  "local_lsa": {
+    "backend": "LocalRetriever",
+    "model": {
+      "name": "tfidf-lsa-64-v1",
+      "fingerprint": "f922aaac0be0ba66b0e66783d8eae3e1187829a0125882ebb7c5a2a079f2f6c2"
+    },
+    "label_provenance": {
+      "status": "unvalidated source-derived seed judgments",
+      "author": "implementation author",
+      "method": "Manually assigned target control identifiers from public NIST control titles and statements; no independent assessor review.",
+      "limits": "Incomplete qrels: other relevant controls may be unjudged. These are smoke-benchmark measurements, not validated evidence of retrieval superiority."
+    },
+    "query_file_sha256": "34e33718f308be1d2a74327a47be14422ed6b04dd42f9a29dcccf39a47e5c371",
+    "query_count": 16,
+    "corpus": {
+      "repository_commit": "78650f02ad9321bb7b817846f8fbd4f2bcd620de",
+      "license": "US public domain; worldwide CC0 per pinned upstream LICENSE.md",
+      "sources": [
+        {
+          "source_id": "nist-800-53",
+          "release": "rev4",
+          "url": "https://raw.githubusercontent.com/usnistgov/oscal-content/78650f02ad9321bb7b817846f8fbd4f2bcd620de/nist.gov/SP800-53/rev4/json/NIST_SP-800-53_rev4_catalog.json",
+          "file": "nist-rev4.json",
+          "sha256": "7000457aec3526582e3c6bd1b508bb2b74623f9d44be55825c9e1af968977fbe",
+          "catalog_version": "2015-01-22",
+          "license_url": "https://github.com/usnistgov/oscal-content/blob/78650f02ad9321bb7b817846f8fbd4f2bcd620de/LICENSE.md",
+          "attribution": "National Institute of Standards and Technology (NIST), SP 800-53 OSCAL catalogs"
+        },
+        {
+          "source_id": "nist-800-53",
+          "release": "rev5",
+          "url": "https://raw.githubusercontent.com/usnistgov/oscal-content/78650f02ad9321bb7b817846f8fbd4f2bcd620de/nist.gov/SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json",
+          "file": "nist-rev5.json",
+          "sha256": "01f37cf90ea99d92242c936cbfbdebcc338eef1f71454e2acac36cc56e9bc062",
+          "catalog_version": "5.2.0",
+          "license_url": "https://github.com/usnistgov/oscal-content/blob/78650f02ad9321bb7b817846f8fbd4f2bcd620de/LICENSE.md",
+          "attribution": "National Institute of Standards and Technology (NIST), SP 800-53 OSCAL catalogs"
+        }
+      ]
+    },
+    "python": "3.13.11",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "measurement": "One untimed dense warmup, then one single-process timed pass; model load/ingestion excluded. No concurrency load test.",
+    "retrieval_unit": "release:control_id; ranked chunk pool of 100 collapsed to unique controls",
+    "resources": {
+      "chunks": 20114,
+      "store_bytes": 41868827,
+      "encoder_bytes": 4133778,
+      "embedding_api_calls": 0,
+      "llm_calls": 0,
+      "external_api_cost_usd": 0,
+      "cost_note": "Local CPU/storage costs unpriced. Atlas storage/index size and charges unmeasured."
+    },
+    "summary": {
+      "lexical": {
+        "recall@5": 0.7857142857142857,
+        "recall@10": 0.8214285714285714,
+        "mrr": 0.7695001077354018,
+        "ndcg@10": 0.7726806850252819,
+        "precision@5": 0.18571428571428575,
+        "precision@10": 0.10000000000000002,
+        "answerable_queries": 14,
+        "negative_queries": 2,
+        "negative_queries_returning_hits": 0,
+        "p50_ms": 83.70260003721341,
+        "p95_ms": 155.5961999692954,
+        "sequential_queries_per_second": 12.356716153197972
+      },
+      "dense": {
+        "recall@5": 0.8214285714285714,
+        "recall@10": 0.8214285714285714,
+        "mrr": 0.691686844229217,
+        "ndcg@10": 0.7053576214220267,
+        "precision@5": 0.18571428571428575,
+        "precision@10": 0.09285714285714287,
+        "answerable_queries": 14,
+        "negative_queries": 2,
+        "negative_queries_returning_hits": 0,
+        "p50_ms": 36.6142499842681,
+        "p95_ms": 56.667174969334155,
+        "sequential_queries_per_second": 25.950060084759137
+      },
+      "hybrid": {
+        "recall@5": 0.8571428571428571,
+        "recall@10": 0.8571428571428571,
+        "mrr": 0.8095238095238095,
+        "ndcg@10": 0.784868135190988,
+        "precision@5": 0.20000000000000004,
+        "precision@10": 0.10000000000000002,
+        "answerable_queries": 14,
+        "negative_queries": 2,
+        "negative_queries_returning_hits": 0,
+        "p50_ms": 127.958050055895,
+        "p95_ms": 183.27974996645935,
+        "sequential_queries_per_second": 8.516628930615974
+      }
+    }
+  },
+  "local_minilm": {
+    "backend": "LocalRetriever",
+    "model": {
+      "name": "sentence-transformers/all-MiniLM-L6-v2",
+      "fingerprint": "b9c9dbf179216b3e98f01ad90271b6bbcfb979fa1512f4e03bd4f34e957c6382"
+    },
+    "label_provenance": {
+      "status": "unvalidated source-derived seed judgments",
+      "author": "implementation author",
+      "method": "Manually assigned target control identifiers from public NIST control titles and statements; no independent assessor review.",
+      "limits": "Incomplete qrels: other relevant controls may be unjudged. These are smoke-benchmark measurements, not validated evidence of retrieval superiority."
+    },
+    "query_file_sha256": "34e33718f308be1d2a74327a47be14422ed6b04dd42f9a29dcccf39a47e5c371",
+    "query_count": 16,
+    "corpus": {
+      "repository_commit": "78650f02ad9321bb7b817846f8fbd4f2bcd620de",
+      "license": "US public domain; worldwide CC0 per pinned upstream LICENSE.md",
+      "sources": [
+        {
+          "source_id": "nist-800-53",
+          "release": "rev4",
+          "url": "https://raw.githubusercontent.com/usnistgov/oscal-content/78650f02ad9321bb7b817846f8fbd4f2bcd620de/nist.gov/SP800-53/rev4/json/NIST_SP-800-53_rev4_catalog.json",
+          "file": "nist-rev4.json",
+          "sha256": "7000457aec3526582e3c6bd1b508bb2b74623f9d44be55825c9e1af968977fbe",
+          "catalog_version": "2015-01-22",
+          "license_url": "https://github.com/usnistgov/oscal-content/blob/78650f02ad9321bb7b817846f8fbd4f2bcd620de/LICENSE.md",
+          "attribution": "National Institute of Standards and Technology (NIST), SP 800-53 OSCAL catalogs"
+        },
+        {
+          "source_id": "nist-800-53",
+          "release": "rev5",
+          "url": "https://raw.githubusercontent.com/usnistgov/oscal-content/78650f02ad9321bb7b817846f8fbd4f2bcd620de/nist.gov/SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json",
+          "file": "nist-rev5.json",
+          "sha256": "01f37cf90ea99d92242c936cbfbdebcc338eef1f71454e2acac36cc56e9bc062",
+          "catalog_version": "5.2.0",
+          "license_url": "https://github.com/usnistgov/oscal-content/blob/78650f02ad9321bb7b817846f8fbd4f2bcd620de/LICENSE.md",
+          "attribution": "National Institute of Standards and Technology (NIST), SP 800-53 OSCAL catalogs"
+        }
+      ]
+    },
+    "python": "3.13.11",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "measurement": "One untimed dense warmup, then one single-process timed pass; model load/ingestion excluded. No concurrency load test.",
+    "retrieval_unit": "release:control_id; ranked chunk pool of 100 collapsed to unique controls",
+    "resources": {
+      "chunks": 20114,
+      "store_bytes": 177162601,
+      "encoder_bytes": 60,
+      "embedding_api_calls": 0,
+      "llm_calls": 0,
+      "external_api_cost_usd": 0,
+      "cost_note": "Local CPU/storage costs unpriced. Atlas storage/index size and charges unmeasured."
+    },
+    "summary": {
+      "lexical": {
+        "recall@5": 0.7857142857142857,
+        "recall@10": 0.8214285714285714,
+        "mrr": 0.7695001077354018,
+        "ndcg@10": 0.7726806850252819,
+        "precision@5": 0.18571428571428575,
+        "precision@10": 0.10000000000000002,
+        "answerable_queries": 14,
+        "negative_queries": 2,
+        "negative_queries_returning_hits": 0,
+        "p50_ms": 82.16260001063347,
+        "p95_ms": 164.47912497096695,
+        "sequential_queries_per_second": 12.10042139301461
+      },
+      "dense": {
+        "recall@5": 0.9285714285714286,
+        "recall@10": 1.0,
+        "mrr": 0.8285714285714285,
+        "ndcg@10": 0.8722369490107036,
+        "precision@5": 0.22857142857142865,
+        "precision@10": 0.12142857142857147,
+        "answerable_queries": 14,
+        "negative_queries": 2,
+        "negative_queries_returning_hits": 1,
+        "p50_ms": 51.250799966510385,
+        "p95_ms": 116.70394995599054,
+        "sequential_queries_per_second": 15.514921330135572
+      },
+      "hybrid": {
+        "recall@5": 0.8928571428571429,
+        "recall@10": 1.0,
+        "mrr": 0.8898809523809523,
+        "ndcg@10": 0.9035444761062329,
+        "precision@5": 0.21428571428571436,
+        "precision@10": 0.12142857142857147,
+        "answerable_queries": 14,
+        "negative_queries": 2,
+        "negative_queries_returning_hits": 1,
+        "p50_ms": 139.2188000609167,
+        "p95_ms": 181.41182500403374,
+        "sequential_queries_per_second": 7.837624792056676
+      }
+    }
+  },
+  "neural_model_revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+  "neural_ingestion": {
+    "elapsed_seconds": 573.1565951000666,
+    "chunks_per_second": 35.09337617669448,
+    "embedded_chunks": 20114,
+    "note": "First run includes lazy model initialization/download inside embedding preparation; unchanged reingestion does not encode again."
+  },
+  "neural_model_assets": {
+    "snapshot_logical_bytes": 91578415,
+    "note": "Model files live in Hugging Face cache, outside the 60-byte encoder pointer. Logical file sizes follow links; not a physical cache disk-usage measurement."
+  },
+  "package_versions": {
+    "sentence-transformers": "5.1.2",
+    "torch": "2.14.1",
+    "transformers": "4.57.6",
+    "numpy": "2.2.6",
+    "scikit-learn": "1.6.1",
+    "pymongo": "4.13.2"
+  },
+  "atlas_preflight": {
+    "target_collection": "aintropy_blended_nist_minilm_20261017_v1",
+    "text_index": "aintropy_nist_text_v1",
+    "vector_index": "aintropy_nist_minilm_vector_v1",
+    "existing_poc_collections_modified": false,
+    "status": "network_blocked",
+    "error_type": "ServerSelectionTimeoutError",
+    "server_error_types": [
+      "NetworkTimeout",
+      "NetworkTimeout",
+      "NetworkTimeout"
+    ]
+  },
+  "verification": {
+    "tests_passed": 33,
+    "tests_skipped": 1,
+    "live_atlas": "not executed: network blocked",
+    "existing_poc_collections_or_indexes_modified": false
+  }
+}

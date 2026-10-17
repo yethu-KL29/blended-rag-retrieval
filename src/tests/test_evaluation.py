@@ -1,0 +1,43 @@
+import json
+
+import pytest
+
+from blended_rag.evaluation import evaluate
+
+
+def test_lazy_model_warmup_precedes_timing_and_is_not_scored(store, tmp_path, monkeypatch):
+    events = []
+
+    class LazyRetriever:
+        model = {"name": "test-lazy-model"}
+
+        def search(self, query, method, k, filters):
+            events.append(("search", method, k))
+            return []
+
+    clock = iter(range(6))
+
+    def timer():
+        events.append(("timer",))
+        return next(clock)
+
+    monkeypatch.setattr("blended_rag.evaluation.time.perf_counter", timer)
+    queries = tmp_path / "queries.json"
+    queries.write_text(json.dumps({"label_provenance": {"status": "test"}, "queries": [
+        {"id": "one", "query": "account", "filters": {}, "relevant": {"rev5:ac-2": 2}}
+    ]}), encoding="utf-8")
+    output = tmp_path / "evaluation.json"
+    evaluate(LazyRetriever(), store, output, queries)
+    assert events[:2] == [("search", "dense", 1), ("timer",)]
+    report = json.loads(output.read_text(encoding="utf-8"))
+    assert report["query_count"] == 1
+    assert len(report["per_query"]) == 3
+    assert all(row["latency_ms"] == 1000 for row in report["per_query"])
+    assert "untimed dense warmup" in report["measurement"]
+
+
+def test_empty_benchmark_is_rejected(store, tmp_path):
+    queries = tmp_path / "empty.json"
+    queries.write_text(json.dumps({"queries": []}), encoding="utf-8")
+    with pytest.raises(ValueError, match="at least one query"):
+        evaluate(None, store, tmp_path / "report.json", queries)

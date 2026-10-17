@@ -27,7 +27,7 @@ python src/main.py --store artifacts/runtime-minilm query "Remove access for dep
 python src/main.py --store artifacts/runtime-minilm evaluate --output artifacts/evaluation-minilm.json
 ```
 
-MiniLM downloads its pinned model on first use. Its execution and quality are unvalidated in the included report. Use separate stores/Atlas collections for different embedding models. Unchanged ingestion embeds zero chunks; changed LSA corpora refit all vectors, while MiniLM reuses unchanged chunk vectors.
+MiniLM downloads its pinned model on first use. It has now been executed locally on all 20,114 chunks; the small benchmark's labels remain unvalidated. See `docs/experiment-summary.json` for the comparison and `docs/measurements/` for complete compressed rankings. Use separate stores/Atlas collections for different embedding models. Unchanged ingestion embeds zero chunks; changed LSA corpora refit all vectors, while MiniLM reuses unchanged chunk vectors.
 
 For Atlas, export the variables shown in [.env.example](.env.example) in your shell, run offline ingestion to prepare the encoder, then run:
 
@@ -39,6 +39,16 @@ python src/main.py --backend atlas evaluate --output artifacts/evaluation-atlas.
 ```
 
 Index setup waits for queryable readiness. Search ingestion remains eventually consistent; wait for evidence before benchmarking. Atlas failures never silently use offline results. Set `RUN_ATLAS_TESTS=1` and a dedicated collection name containing `test` to enable the gated integration test. No live Atlas validation is claimed. `.env` is an example only and is not automatically loaded.
+
+For the authorized KMS POC database experiment, use its URI/database privately and set `MONGODB_COLLECTION=aintropy_blended_nist_minilm_20261017_v1`, `ATLAS_TEXT_INDEX=aintropy_nist_text_v1`, and `ATLAS_VECTOR_INDEX=aintropy_nist_minilm_vector_v1`. This also uses the separate `aintropy_blended_nist_minilm_20261017_v1_sources` collection. Prepare MiniLM as above, then run these commands after configuring network access:
+
+```sh
+python src/main.py --store artifacts/runtime-minilm --backend atlas indexes
+python src/main.py --store artifacts/runtime-minilm --backend atlas ingest --encoder minilm
+python src/main.py --store artifacts/runtime-minilm --backend atlas evaluate --output artifacts/evaluation-atlas-minilm.json
+```
+
+The current preflight resolves all three nodes but TCP connections time out before authentication. No Atlas collections/indexes have been created or modified by this experiment. Check the VPN, outbound MongoDB connectivity and Atlas Network Access before retrying. No credentials are included in this repository.
 
 See [docs/README.md](docs/README.md) for architecture, measurements and limits. Docker: `docker build -t compliance-rag .` then `docker run --rm -p 8000:8000 compliance-rag`.
 
