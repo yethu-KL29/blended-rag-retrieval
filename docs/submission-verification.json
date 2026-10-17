@@ -1,0 +1,96 @@
+{
+  "verified_on": "2026-10-17",
+  "run_yaml_sha256": "e790331b2b59a1d4b2829f4a59025229529292aba095bc695c76241e49292761",
+  "exact_run_and_test_commands_match": true,
+  "all_run_and_test_commands_passed": true,
+  "environment": {
+    "base_requirements_installed": true,
+    "isolated_venv": true,
+    "torch_present": false,
+    "google_genai_present": false,
+    "external_network_and_dns": "denied; loopback permitted",
+    "cloud_variables": "cleared"
+  },
+  "commands": [
+    {
+      "command": "python src/main.py --help",
+      "exit_code": 0,
+      "elapsed_seconds": 43.71209670009557
+    },
+    {
+      "command": "python src/main.py --mode local ingest",
+      "exit_code": 0,
+      "elapsed_seconds": 78.77854050009046
+    },
+    {
+      "command": "python src/main.py --mode local query \"How are user accounts managed?\" --release rev5 --method hybrid -k 3",
+      "exit_code": 0,
+      "elapsed_seconds": 101.69826199999079
+    },
+    {
+      "command": "python src/main.py --mode local compare ac-1 --old rev4 --new rev5",
+      "exit_code": 0,
+      "elapsed_seconds": 78.23215609998442
+    },
+    {
+      "command": "python src/main.py --mode local evaluate --output artifacts/evaluation-local.json",
+      "exit_code": 0,
+      "elapsed_seconds": 110.70331640006043
+    },
+    {
+      "command": "python src/main.py --mode local --lexical-profile boosted-sum --query-formulation identifier query \"CP-9.1\" --method lexical --release rev5 -k 3",
+      "exit_code": 0,
+      "elapsed_seconds": 68.59394759999122
+    },
+    {
+      "command": "python src/main.py --mode local --lexical-profile multi-field evaluate --methods lexical hybrid --output artifacts/evaluation-field-grader.json",
+      "exit_code": 0,
+      "elapsed_seconds": 105.8986335999798
+    },
+    {
+      "command": "python src/main.py --mode local ingest",
+      "exit_code": 0,
+      "elapsed_seconds": 83.01889860001393
+    },
+    {
+      "command": "python -m pytest src/tests -q",
+      "exit_code": 0,
+      "elapsed_seconds": 128.26276960002724
+    }
+  ],
+  "tests": {
+    "passed": 89,
+    "skipped": 2,
+    "summary": "89 passed, 2 skipped, 2 warnings in 94.11s (0:01:34)",
+    "skip_reasons": [
+      "Explicit live Atlas integration gate",
+      "Explicit cached real SPLADE smoke gate"
+    ]
+  },
+  "independent_review": {
+    "findings": 2,
+    "fixed": 2,
+    "deferred": 0
+  },
+  "live_atlas_hybrid_smoke": {
+    "status": "passed",
+    "embedding_provider": "gemini",
+    "citations": 3,
+    "answer_engine": "extractive-nlp"
+  },
+  "splade_full_corpus": {
+    "status": "unfinished; stopped at user request to conclude",
+    "completed_chunks": 7168,
+    "total_chunks": 20114,
+    "checkpoint_elapsed_seconds": 2112.302876300062,
+    "nnz_in_completed_batches": 743168,
+    "benchmark_status": "not run",
+    "resume_command": "python src/main.py --mode local sparse-index --batch-size 8 --checkpoint-size 128 --threads 4"
+  },
+  "limitations": [
+    "Setup dependency installation needs a package source; application runtime is offline.",
+    "Full SPLADE benchmark is not complete; no quality results claimed.",
+    "Small independently unvalidated evaluation qrels.",
+    "Docker/Linux execution and production load remain unverified."
+  ]
+}

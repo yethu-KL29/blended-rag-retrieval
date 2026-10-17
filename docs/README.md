@@ -1,6 +1,8 @@
-# Enterprise compliance retrieval
+# Local compliance Blended RAG
 
-MongoDB Atlas plus Gemini is the primary architecture. The credential-free grading mode uses BM25, bundled quantized ONNX MiniLM, FAISS and RRF. Read the explicit [architecture decision, configuration and execution commands](architecture-modes.md); [current independent measurements](mode-benchmarks.md) distinguish these modes from the preserved historical experiments.
+Local indexed BM25 + bundled quantized ONNX MiniLM/FAISS + explicitly optional SPLADE is the primary research architecture. The credential-free grading route keeps its two-way BM25/MiniLM hybrid default; optional three-way blended retrieval requires explicit pinned model setup and sparse indexing. MongoDB Atlas plus Gemini remains the hybrid fallback. Read the [local sparse architecture and limits](local-splade.md), [execution commands](architecture-modes.md), and [historical independent measurements](mode-benchmarks.md). Stored measurements retain their original meaning.
+
+The [reproduction/evidence guide](grading-guide.md) maps each requested deliverable to code, commands and meaningful tests. [Detailed architecture diagrams](system-architecture.md) show independent indexes, query branches, fusion, answers and deployment boundaries.
 
 ```mermaid
 flowchart LR
@@ -10,6 +12,10 @@ flowchart LR
   A --> E[RRF and Gemini cited answer]
   P --> M[Bundled MiniLM or validated corpus cache]
   M --> F[Local BM25 and FAISS]
+  P --> S[Optional pinned local SPLADE index]
+  S --> B[Explicit three-way weighted RRF]
+  F --> B
+  B --> L
   F --> L[RRF and cited NLP sentences]
   A --> V[Separate retrieval evaluations]
   F --> V

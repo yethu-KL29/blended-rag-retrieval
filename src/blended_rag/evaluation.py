@@ -31,8 +31,8 @@ def metrics(ranking: list[str], relevant: dict[str, int]) -> dict:
 def evaluate(retriever, store, output="artifacts/evaluation.json", queries=DATA / "queries.json", methods=None, warm_methods=False):
     warm_methods = warm_methods or methods is not None
     methods = ["lexical", "dense", "hybrid"] if methods is None else list(methods)
-    if not methods or len(set(methods)) != len(methods) or set(methods) - {"lexical", "dense", "hybrid"}:
-        raise ValueError("Evaluation methods must be a nonempty unique subset of lexical, dense, hybrid")
+    if not methods or len(set(methods)) != len(methods) or set(methods) - {"lexical", "dense", "hybrid", "sparse", "blended"}:
+        raise ValueError("Evaluation methods must be a nonempty unique subset of lexical, dense, hybrid, sparse, blended")
     raw = Path(queries).read_bytes()
     benchmark = json.loads(raw)
     if not benchmark["queries"]:
@@ -156,6 +156,63 @@ def ablate(retriever, store, output="artifacts/ablation.json", queries=DATA / "q
             checkpoint()
         report["status"] = "complete" if all(row["status"] == "complete" for row in report["configurations"]) else "failed"
         checkpoint()
+    finally:
+        retriever.config = original
+    return {"output": str(target), "status": report["status"], "configurations": report["configurations"]}
+
+
+def sparse_evaluate(retriever, store, output="artifacts/sparse-evaluation.json", queries=DATA / "queries.json"):
+    """Checkpoint all five methods separately using unchanged frozen queries/qrels."""
+    from dataclasses import replace
+    from .retrieval import RetrievalConfig
+    from .postings import atomic_json
+    from .ingestion import Encoder, NeuralEncoder
+    from .providers import OnnxEncoder
+    if getattr(retriever, "vector_engine", "") == "mongodb-atlas-vector-search":
+        raise ValueError("Sparse evaluation requires local retrieval; Atlas retains hybrid only")
+    encoder = getattr(retriever, "encoder", None)
+    # Only known local encoders can uphold this comparison's zero external API cost.
+    if not isinstance(encoder, (Encoder, NeuralEncoder, OnnxEncoder)):
+        raise ValueError("Sparse evaluation requires a supported local dense encoder; cloud/Gemini encoders are excluded")
+    dense_representation = {
+        "model": retriever.model, "dimensions": encoder.dimensions,
+        "encoder_family": "TF-IDF + SVD (LSA)" if isinstance(encoder, Encoder) else "MiniLM neural embedding",
+        "vector_engine": retriever.vector_engine, "document_input": "title + control_id + text",
+        "query_input": "raw query", "scoring": "cosine / normalized inner product"}
+    target = Path(output)
+    original = getattr(retriever, "config", RetrievalConfig())
+    raw = Path(queries).read_bytes()
+    first = json.loads(raw)["queries"][0]
+    report = {"status": "running", "query_file_sha256": digest(raw), **provenance(retriever),
+              "protocol": "Same frozen qrels; pool 100; one first-call timing then warmed timed pass per method. Shared process: first-call latency includes only model/index loads not already performed by earlier configurations.",
+              "limitations": ["Small unvalidated qrels; no default promotion or IBM replication claim.",
+                              "CPU/storage costs unpriced; external API cost is zero."],
+              "input_representations": {"lexical": original.metadata(),
+                  "dense": dense_representation,
+                  "sparse": "title + control_id + text; raw nonnegative SPLADE weights; sparse dot product; max256"},
+              "configurations": [{"method": method, "status": "pending"} for method in
+                                  ("lexical", "dense", "sparse", "hybrid", "blended")]}
+    atomic_json(target, report)
+    try:
+        for row in report["configurations"]:
+            method = row["method"]
+            retriever.config = replace(original, sparse_weight=original.sparse_weight or 1.0)
+            row.update(status="running", config=retriever.config.metadata())
+            atomic_json(target, report)
+            try:
+                started = time.perf_counter()
+                retriever.search(first["query"], method, 100, first["filters"])
+                row["first_call_ms"] = (time.perf_counter() - started) * 1000
+                detail = target.parent / f"{target.stem}-{method}.json"
+                result = evaluate(retriever, store, detail, queries, methods=[method], warm_methods=True)
+                row.update(status="complete", **result)
+                row["sparse_resources"] = getattr(retriever, "sparse_metadata", None)
+            except Exception as exc:
+                row.update(status="failed", error_type=type(exc).__name__)
+            atomic_json(target, report)
+        report["status"] = "complete" if all(r["status"] == "complete" for r in report["configurations"]) else "failed"
+        report["sparse_resources"] = getattr(retriever, "sparse_metadata", None)
+        atomic_json(target, report)
     finally:
         retriever.config = original
     return {"output": str(target), "status": report["status"], "configurations": report["configurations"]}

@@ -27,16 +27,17 @@ class RetrievalConfig:
     query_formulation: str = "raw"
     lexical_weight: float = 1.0
     dense_weight: float = 1.0
+    sparse_weight: float = 0.0
 
     def __post_init__(self):
         if self.lexical_profile not in PROFILES:
             raise ValueError("Unknown lexical profile")
         if self.query_formulation not in {"raw", "identifier"}:
             raise ValueError("query formulation must be raw or identifier")
-        for value in (self.lexical_weight, self.dense_weight):
+        for value in (self.lexical_weight, self.dense_weight, self.sparse_weight):
             if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0:
                 raise ValueError("Fusion weights must be finite nonnegative numbers")
-        if self.lexical_weight + self.dense_weight <= 0:
+        if self.lexical_weight + self.dense_weight + self.sparse_weight <= 0:
             raise ValueError("At least one fusion weight must be positive")
 
     def metadata(self):
@@ -81,6 +82,7 @@ class LocalRetriever:
     vector_engine = "numpy-exact-cosine"
     answer_engine = "extractive-nlp"
     def __init__(self, store: LocalStore, config=None):
+        self.directory = store.directory
         self.config = config or RetrievalConfig()
         state = store.read()
         self.chunks = [Chunk(**c) for c in state["chunks"]]
@@ -99,6 +101,9 @@ class LocalRetriever:
             df = Counter(term for c in counts for term in c)
             idf = {term: math.log(1 + (len(counts) - n + .5) / (n + .5)) for term, n in df.items()}
             self.field_stats[field] = (counts, lengths, max(float(lengths.mean()), 1e-12), idf)
+        from .postings import BM25Postings
+        self.postings = BM25Postings(store.directory, self.chunks, {
+            "combined": (self.counts, self.lengths, max(self.average_length, 1e-12), self.idf), **self.field_stats})
 
     def _bm25(self, terms, selected, stats):
         counts, lengths, average, idf = stats
@@ -113,15 +118,30 @@ class LocalRetriever:
     def search(self, query, method="hybrid", k=10, filters=None):
         validate_query(query, k)
         filters = validate_filters(filters)
-        if method not in {"lexical", "dense", "hybrid"}:
-            raise ValueError("method must be lexical, dense or hybrid")
-        if method == "hybrid":
+        if method not in {"lexical", "dense", "hybrid", "sparse", "blended"}:
+            raise ValueError("method must be lexical, dense, hybrid, sparse or blended")
+        if method in {"hybrid", "blended"}:
+            if method == "blended" and self.config.sparse_weight <= 0:
+                raise ValueError("blended requires positive sparse_weight and a ready sparse-index")
+            if method == "hybrid" and self.config.lexical_weight + self.config.dense_weight <= 0:
+                raise ValueError("hybrid requires positive lexical or dense weight")
             pool = max(50, k * 5)
-            return rrf([self.search(query, "lexical", min(pool, 100), filters) if self.config.lexical_weight else [],
-                        self.search(query, "dense", min(pool, 100), filters) if self.config.dense_weight else []], k,
-                       weights=[self.config.lexical_weight, self.config.dense_weight])
+            branches = [("lexical", self.config.lexical_weight), ("dense", self.config.dense_weight)]
+            # Hybrid retains its original two branches; sparse participates only by explicit selection.
+            if method == "blended":
+                branches.append(("sparse", self.config.sparse_weight))
+            return rrf([self.search(query, branch, min(pool, 100), filters) if weight else []
+                        for branch, weight in branches], k, weights=[weight for _, weight in branches])
         selected = [i for i, c in enumerate(self.chunks) if all(getattr(c, key) == val for key, val in filters.items())]
-        if method == "dense":
+        if method == "sparse":
+            from .sparse import SparseEncoder, SparseStore
+            if not hasattr(self, "sparse_encoder"):
+                self.sparse_encoder = SparseEncoder()
+            if not hasattr(self, "sparse_index"):
+                self.sparse_index, self.sparse_metadata = SparseStore(self.directory / "sparse").load(self.chunks, self.sparse_encoder.identity)
+            vector = self.sparse_encoder.encode_query(query)
+            scores = (self.sparse_index @ vector.T).toarray().ravel()
+        elif method == "dense":
             vector = self.encoder.encode([query])[0]
             scores = self.vectors @ vector
         else:
@@ -130,10 +150,10 @@ class LocalRetriever:
                 selected = [i for i in selected if self.chunks[i].control_id.lower() in ids]
             profile = self.config.lexical_profile
             if profile == "combined":
-                scores = self._bm25(tokens(query), selected, (self.counts, self.lengths, max(self.average_length, 1e-12), self.idf))
+                scores = self.postings.score("combined", tokens(query))
             else:
                 fields = self.config.metadata()["fields"]
-                parts = [weight * self._bm25(ids if field == "control_id" else tokens(query), selected, self.field_stats[field])
+                parts = [weight * self.postings.score(field, ids if field == "control_id" else tokens(query))
                          for field, weight in fields.items()]
                 scores = np.maximum.reduce(parts) if profile == "best-fields" else np.sum(parts, axis=0)
         indices = sorted((i for i in selected if scores[i] > 1e-8), key=lambda i: (-scores[i], self.chunks[i].chunk_id))[:k]

@@ -73,8 +73,19 @@ def parser():
     root.add_argument("--query-formulation", choices=["raw", "identifier"], default="raw")
     root.add_argument("--lexical-weight", type=float, default=1.0)
     root.add_argument("--dense-weight", type=float, default=1.0)
+    root.add_argument("--sparse-weight", type=float, default=0.0)
     sub = root.add_subparsers(dest="command", required=True)
     sub.add_parser("download", help="Redownload pinned corpus and verify SHA256")
+    sub.add_parser("sparse-setup", help="Explicitly download pinned optional SPLADE weights")
+    sparse_index = sub.add_parser("sparse-index", help="Build/resume optional local SPLADE postings")
+    sparse_index.add_argument("--batch-size", type=int, default=8)
+    sparse_index.add_argument("--checkpoint-size", type=int, default=128,
+                              help="Documents per persisted checkpoint; encoder batches remain bounded separately")
+    sparse_index.add_argument("--threads", type=int, default=4)
+    sparse_query = sub.add_parser("sparse-inspect", help="Inspect learned query expansion weights")
+    sparse_query.add_argument("question")
+    sparse_evaluate = sub.add_parser("sparse-evaluate", help="Compare five local methods on frozen qrels")
+    sparse_evaluate.add_argument("--output", default="artifacts/sparse-evaluation.json")
     ingestion = sub.add_parser("ingest")
     ingestion.add_argument("--encoder", choices=["lsa", "minilm", "onnx", "gemini"])
     ingestion.add_argument("--cache", default="src/assets/corpus-minilm.npz")
@@ -84,7 +95,7 @@ def parser():
     indexes.add_argument("--fields-only", action="store_true", help="Create only the additive field index")
     query = sub.add_parser("query")
     query.add_argument("question")
-    query.add_argument("--method", choices=["lexical", "dense", "hybrid"], default="hybrid")
+    query.add_argument("--method", choices=["lexical", "dense", "hybrid", "sparse", "blended"], default="hybrid")
     query.add_argument("--release", choices=["rev4", "rev5"])
     query.add_argument("--control-id")
     query.add_argument("--source-id")
@@ -95,7 +106,7 @@ def parser():
     comparison.add_argument("--new", default="rev5", choices=["rev4", "rev5"])
     evaluation = sub.add_parser("evaluate")
     evaluation.add_argument("--output", default="artifacts/evaluation.json")
-    evaluation.add_argument("--methods", nargs="+", choices=["lexical", "dense", "hybrid"])
+    evaluation.add_argument("--methods", nargs="+", choices=["lexical", "dense", "hybrid", "sparse", "blended"])
     ablation = sub.add_parser("ablate")
     ablation.add_argument("--output", default="artifacts/ablation.json")
     serve = sub.add_parser("serve")
@@ -130,8 +141,25 @@ def main(argv=None):
     store = LocalStore(args.store)
     retriever = None
     try:
-        config = RetrievalConfig(args.lexical_profile, args.query_formulation, args.lexical_weight, args.dense_weight)
-        if args.command == "download":
+        config = RetrievalConfig(args.lexical_profile, args.query_formulation, args.lexical_weight, args.dense_weight, args.sparse_weight)
+        sparse_selected = (args.command.startswith("sparse-") or
+                           getattr(args, "method", None) in {"sparse", "blended"} or
+                           bool(set(getattr(args, "methods", None) or []) & {"sparse", "blended"}))
+        if sparse_selected and args.backend == "atlas":
+            raise ValueError("SPLADE sparse/blended methods require local mode; Atlas supports lexical, dense, hybrid")
+        if args.command == "sparse-setup":
+            from blended_rag.sparse import SparseEncoder
+            result = SparseEncoder.setup()
+        elif args.command == "sparse-inspect":
+            from blended_rag.sparse import SparseEncoder
+            result = {"expansions": SparseEncoder().expansions(args.question)}
+        elif args.command == "sparse-index":
+            from blended_rag.sparse import SparseEncoder, SparseStore
+            chunks = [Chunk(**c) for c in store.read()["chunks"]]
+            result = SparseStore(store.directory / "sparse").build(chunks,
+                SparseEncoder(args.threads, args.batch_size), args.checkpoint_size,
+                progress=lambda event: print(json.dumps({"sparse_progress": event}), file=sys.stderr, flush=True))
+        elif args.command == "download":
             result = {"verified_sources": [s["release"] for s, _ in load_sources(download=True)]}
         elif args.command == "ingest":
             chunks = [chunk for source, doc in load_sources() for chunk in parse_catalog(source, doc)]
@@ -177,6 +205,9 @@ def main(argv=None):
                 result = retriever.setup_field_index() if args.fields_only else retriever.setup_indexes()
             elif args.command == "ablate":
                 result = ablate(retriever, store, args.output)
+            elif args.command == "sparse-evaluate":
+                from blended_rag.evaluation import sparse_evaluate
+                result = sparse_evaluate(retriever, store, args.output)
             elif args.command == "evaluate":
                 result = evaluate(retriever, store, args.output, methods=args.methods)
             else:
@@ -185,13 +216,13 @@ def main(argv=None):
                 result = answer(retriever, args.question, args.method, args.k, filters)
         if retriever:
             result.update(provenance(retriever))
-        elif args.command != "download":
+        elif args.command not in {"download", "sparse-setup", "sparse-inspect"}:
             state = store.read()
             result.update({"mode": mode or "legacy", "embedding_model": {"name": state["model_name"], "fingerprint": state["model_fingerprint"]},
                            "vector_engine": "faiss-IndexFlatIP" if mode == "local" else "mongodb-atlas-vector-search" if args.backend == "atlas" else "numpy-exact-cosine",
                            "answer_engine": args.answer_engine or ("gemini-grounded" if mode == "enterprise" else "extractive-nlp")})
         print(json.dumps(result, indent=2, ensure_ascii=True, allow_nan=False))
-        return 2 if args.command == "ablate" and result["status"] == "failed" else 0
+        return 2 if args.command in {"ablate", "sparse-evaluate"} and result["status"] == "failed" else 0
     except (ValueError, OSError) as exc:
         print(json.dumps({"error": str(exc)}), file=sys.stderr)
         return 2

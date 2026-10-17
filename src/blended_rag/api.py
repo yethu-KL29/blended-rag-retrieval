@@ -15,7 +15,7 @@ from .providers import ProviderError, provenance
 class Query(BaseModel):
     model_config = ConfigDict(extra="forbid")
     question: str = Field(min_length=1, max_length=4000)
-    method: Literal["lexical", "dense", "hybrid"] = "hybrid"
+    method: Literal["lexical", "dense", "hybrid", "sparse", "blended"] = "hybrid"
     k: int = Field(default=5, ge=1, le=100)
     filters: dict[str, str] = Field(default_factory=dict)
 

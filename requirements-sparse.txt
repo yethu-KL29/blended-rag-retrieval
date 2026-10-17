@@ -1,0 +1,5 @@
+# Explicit optional CPU SPLADE setup; never required by run.yaml/default grader.
+-r requirements.txt
+torch==2.14.1
+sentence-transformers==5.1.2
+transformers==4.57.6

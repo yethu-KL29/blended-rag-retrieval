@@ -1,6 +1,8 @@
 # Version-aware compliance Blended RAG
 
-Retrieve cited NIST SP 800-53 controls from independent source snapshots, compare their exact text, and benchmark lexical, dense and reciprocal-rank fusion retrieval. Primary enterprise mode uses Atlas Search/Vector Search, Gemini embeddings and cited Gemini synthesis. Default grading mode uses bundled ONNX MiniLM, real FAISS, BM25/RRF and quoted question-focused NLP answers with no credentials, runtime downloads or PyTorch.
+Retrieve cited NIST SP 800-53 controls from independent source snapshots, compare their exact text, and benchmark lexical, dense and reciprocal-rank fusion retrieval. The primary research implementation is local indexed BM25 + bundled ONNX MiniLM/FAISS + explicitly optional SPLADE. MongoDB Atlas/Gemini remains the cloud hybrid fallback. Default grading uses BM25/MiniLM hybrid and quoted question-focused NLP answers with no credentials, runtime downloads or PyTorch.
+
+Review the [requirement-to-evidence and test guide](docs/grading-guide.md) and [indexing, retrieval and deployment diagrams](docs/system-architecture.md). These identify what the default commands execute and which optional checks require additional setup.
 
 See [the execution-mode architecture decision and exact local, baseline, cache-export and enterprise commands](docs/architecture-modes.md). Use `--mode local` for grading and `--mode enterprise --env-file .env` for optional private cloud configuration. Stores, model fingerprints, usage and reports remain distinct. [Current local and live enterprise results](docs/mode-benchmarks.md) are reported separately from preserved historical baselines.
 
@@ -44,7 +46,23 @@ python src/main.py --mode enterprise --env-file .env evaluate --output artifacts
 python src/main.py --mode enterprise --env-file .env serve
 ```
 
-The primary solution uses `gemini-embedding-001` (768 dimensions), Atlas BM25/vector retrieval and client RRF. The answer model is configurable through `GEMINI_CHAT_MODEL`; the live POC uses `gemini-3.1-flash-lite`. Local answers use extractive NLP and require no generative model. Enterprise failures remain enterprise errors; no automatic local substitution occurs.
+The cloud fallback uses `gemini-embedding-001` (768 dimensions), Atlas BM25/vector retrieval and client RRF. The answer model is configurable through `GEMINI_CHAT_MODEL`; the historical live POC used `gemini-3.1-flash-lite`. Local answers use extractive NLP and require no generative model. Enterprise failures remain enterprise errors; no automatic local substitution occurs.
+
+Optional SPLADE is a separate explicit setup, index and retrieval path. Install its dependencies only in an optional environment (CPU Torch can be installed from the PyTorch CPU package index):
+
+```sh
+python -m pip install -r requirements-sparse.txt
+python src/main.py --mode local sparse-setup
+python src/main.py --mode local sparse-index --batch-size 8 --checkpoint-size 128 --threads 4
+python src/main.py --mode local query "Remove access for departing employees" --method sparse --release rev5
+python src/main.py --mode local --sparse-weight 1 query "Remove access for departing employees" --method blended --release rev5
+python src/main.py --mode local sparse-inspect "repair damaged information"
+python src/main.py --mode local sparse-evaluate --output artifacts/sparse-evaluation-local.json
+```
+
+Only `sparse-setup` downloads weights. Indexing and queries require the pinned local cache; missing dependencies, weights or ready index produce errors. Repeating `sparse-index` resumes completed checkpoints for identical source/model inputs; a ready index is published atomically. Inference batches and persisted checkpoints have separate sizes. Sparse setup is CPU intensive, uses approximately 440 MB of model weights plus runtime memory, and indexing the full corpus may take substantial time. The default `sparse_weight=0` keeps existing hybrid behavior; `blended` requires positive sparse weight. API `method` accepts `sparse`/`blended`; server weights come from CLI options before `serve`. Atlas rejects both methods.
+
+SPLADE uses [`naver/splade-cocondenser-ensembledistil`](https://huggingface.co/naver/splade-cocondenser-ensembledistil) at revision `49cf4c7b0db5b870a401ddf5e2669993ef3699c7`, attributed to NAVER under **CC-BY-NC-SA-4.0**. Its noncommercial/share-alike terms apply to the optional model. It encodes title + control ID + text, truncated at 256 model tokens, into 30,522 raw nonnegative learned vocabulary weights. Ranking uses sparse dot products without dense normalization. This differs from field-aware BM25. See [local sparse architecture and limits](docs/local-splade.md). Historical measurements remain historical; small unvalidated qrels do not justify a default change or an exact IBM replication claim.
 
 See [docs/README.md](docs/README.md) for architecture, measurements and limits. Docker: `docker build -t compliance-rag .` then `docker run --rm -p 8000:8000 compliance-rag`.
 

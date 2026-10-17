@@ -11,4 +11,4 @@ run_commands:
   - "python src/main.py --mode local ingest"
 test_commands:
   - "python -m pytest src/tests -q"
-notes: "Python 3.11-3.13. Default grading mode uses bundled ONNX MiniLM, BM25, FAISS and RRF without credentials, network, PyTorch or runtime downloads. Corpus cache is validated against complete ordered source records and model fingerprints; mismatches require real encoding. Enterprise Atlas/Gemini is explicit optional setup. Qrels are unvalidated seeds; retrieval recall is not answer accuracy. Run from repository root."
+notes: "Python 3.11-3.13. Default grading mode uses bundled ONNX MiniLM, indexed BM25, FAISS and RRF without credentials, network, PyTorch or runtime downloads. Corpus cache is validated against complete ordered source records and model fingerprints; mismatches require real encoding. Primary local research additionally supports explicit optional SPLADE setup/indexing; see docs/grading-guide.md and docs/local-splade.md. Enterprise Atlas/Gemini is an explicit hybrid fallback. Qrels are unvalidated seeds; retrieval recall is not answer accuracy. Run from repository root."

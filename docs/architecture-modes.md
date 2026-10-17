@@ -1,6 +1,10 @@
-# Decision: enterprise architecture with offline grading
+# Current architecture decision
 
-Primary deployment uses Gemini document/query embeddings, MongoDB Atlas lexical/vector search, reciprocal rank fusion, and bounded Gemini synthesis. Default grading uses bundled ONNX MiniLM, BM25, FAISS IndexFlatIP and RRF, followed by question-focused extractive sentence selection. Mode is explicit: ambient credentials never select enterprise, and enterprise failures never return local results.
+Local indexed BM25 + MiniLM/FAISS + explicitly optional SPLADE is the primary research implementation. MongoDB/Gemini remains an explicit hybrid fallback. This supersedes the earlier enterprise-first choice. See [local sparse architecture](local-splade.md) and README for current commands; default run.yaml remains base-only and offline.
+
+## Historical decision: enterprise architecture with offline grading
+
+The earlier primary deployment used Gemini document/query embeddings, MongoDB Atlas lexical/vector search, reciprocal rank fusion, and bounded Gemini synthesis. Default grading uses bundled ONNX MiniLM, BM25, FAISS IndexFlatIP and RRF, followed by question-focused extractive sentence selection. Mode is explicit: ambient credentials never select enterprise, and enterprise failures never return local results.
 
 Stores default to `artifacts/runtime-local` and `artifacts/runtime-enterprise`. Legacy LSA/full-precision MiniLM remain separate routes. Results identify mode, embedding model, vector engine and answer engine. Evaluation measures retrieval, not answer accuracy. Source-derived qrels are small and unvalidated. Historical reports retain their original meaning and are not measurements of the new modes.
 

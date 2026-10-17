@@ -135,6 +135,8 @@ class AtlasRetriever:
     def search(self, query, method="hybrid", k=10, filters=None):
         validate_query(query, k)
         filters = validate_filters(filters)
+        if method in {"sparse", "blended"}:
+            raise ValueError("Atlas does not support sparse/blended; use local mode with sparse-index")
         if method not in {"lexical", "dense", "hybrid"}:
             raise ValueError("method must be lexical, dense or hybrid")
         config = getattr(self, "config", RetrievalConfig())
