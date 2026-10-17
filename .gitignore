@@ -5,3 +5,9 @@ venv/
 .env
 node_modules/
 .DS_Store
+artifacts/runtime*/
+.pytest_cache/
+_bmad/
+artifacts/project-context*
+artifacts/evaluation*.json
+artifacts/verification*.json

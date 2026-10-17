@@ -1,0 +1,111 @@
+{
+  "backend": "LocalRetriever",
+  "model": {
+    "name": "tfidf-lsa-64-v1",
+    "fingerprint": "f922aaac0be0ba66b0e66783d8eae3e1187829a0125882ebb7c5a2a079f2f6c2"
+  },
+  "label_provenance": {
+    "status": "unvalidated source-derived seed judgments",
+    "author": "implementation author",
+    "method": "Manually assigned target control identifiers from public NIST control titles and statements; no independent assessor review.",
+    "limits": "Incomplete qrels: other relevant controls may be unjudged. These are smoke-benchmark measurements, not validated evidence of retrieval superiority."
+  },
+  "query_file_sha256": "34e33718f308be1d2a74327a47be14422ed6b04dd42f9a29dcccf39a47e5c371",
+  "query_count": 16,
+  "corpus": {
+    "repository_commit": "78650f02ad9321bb7b817846f8fbd4f2bcd620de",
+    "license": "US public domain; worldwide CC0 per pinned upstream LICENSE.md",
+    "sources": [
+      {
+        "source_id": "nist-800-53",
+        "release": "rev4",
+        "url": "https://raw.githubusercontent.com/usnistgov/oscal-content/78650f02ad9321bb7b817846f8fbd4f2bcd620de/nist.gov/SP800-53/rev4/json/NIST_SP-800-53_rev4_catalog.json",
+        "file": "nist-rev4.json",
+        "sha256": "7000457aec3526582e3c6bd1b508bb2b74623f9d44be55825c9e1af968977fbe",
+        "catalog_version": "2015-01-22",
+        "license_url": "https://github.com/usnistgov/oscal-content/blob/78650f02ad9321bb7b817846f8fbd4f2bcd620de/LICENSE.md",
+        "attribution": "National Institute of Standards and Technology (NIST), SP 800-53 OSCAL catalogs"
+      },
+      {
+        "source_id": "nist-800-53",
+        "release": "rev5",
+        "url": "https://raw.githubusercontent.com/usnistgov/oscal-content/78650f02ad9321bb7b817846f8fbd4f2bcd620de/nist.gov/SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json",
+        "file": "nist-rev5.json",
+        "sha256": "01f37cf90ea99d92242c936cbfbdebcc338eef1f71454e2acac36cc56e9bc062",
+        "catalog_version": "5.2.0",
+        "license_url": "https://github.com/usnistgov/oscal-content/blob/78650f02ad9321bb7b817846f8fbd4f2bcd620de/LICENSE.md",
+        "attribution": "National Institute of Standards and Technology (NIST), SP 800-53 OSCAL catalogs"
+      }
+    ]
+  },
+  "python": "3.13.11",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "measurement": "Single-process warm index, one timed pass; model load/ingestion excluded. No concurrency load test.",
+  "retrieval_unit": "release:control_id; ranked chunk pool of 100 collapsed to unique controls",
+  "resources": {
+    "chunks": 20114,
+    "store_bytes": 41868827,
+    "encoder_bytes": 4133778,
+    "embedding_api_calls": 0,
+    "llm_calls": 0,
+    "external_api_cost_usd": 0,
+    "cost_note": "Local CPU/storage costs unpriced. Atlas storage/index size and charges unmeasured."
+  },
+  "summary": {
+    "lexical": {
+      "recall@5": 0.7857142857142857,
+      "recall@10": 0.8214285714285714,
+      "mrr": 0.7695001077354018,
+      "ndcg@10": 0.7726806850252819,
+      "precision@5": 0.18571428571428575,
+      "precision@10": 0.10000000000000002,
+      "answerable_queries": 14,
+      "negative_queries": 2,
+      "negative_queries_returning_hits": 0,
+      "p50_ms": 123.65360005060211,
+      "p95_ms": 198.44730000477284,
+      "sequential_queries_per_second": 8.556367073573423
+    },
+    "dense": {
+      "recall@5": 0.8214285714285714,
+      "recall@10": 0.8214285714285714,
+      "mrr": 0.691686844229217,
+      "ndcg@10": 0.7053576214220267,
+      "precision@5": 0.18571428571428575,
+      "precision@10": 0.09285714285714287,
+      "answerable_queries": 14,
+      "negative_queries": 2,
+      "negative_queries_returning_hits": 0,
+      "p50_ms": 62.17440002365038,
+      "p95_ms": 101.61872502067126,
+      "sequential_queries_per_second": 15.42962091329104
+    },
+    "hybrid": {
+      "recall@5": 0.8571428571428571,
+      "recall@10": 0.8571428571428571,
+      "mrr": 0.8095238095238095,
+      "ndcg@10": 0.784868135190988,
+      "precision@5": 0.20000000000000004,
+      "precision@10": 0.10000000000000002,
+      "answerable_queries": 14,
+      "negative_queries": 2,
+      "negative_queries_returning_hits": 0,
+      "p50_ms": 184.2091499711387,
+      "p95_ms": 267.54937501391396,
+      "sequential_queries_per_second": 5.840473312335039
+    }
+  },
+  "initial_ingestion": {
+    "elapsed_seconds": 8.268555299961008,
+    "chunks_per_second": 2432.589402902687,
+    "embedded_chunks": 20114
+  },
+  "verification": {
+    "environment": "isolated .venv, Python 3.13.11, Windows",
+    "run_yaml_commands_passed": 8,
+    "tests_passed": 31,
+    "tests_skipped": 1,
+    "skip_reason": "Live Atlas credentials not configured",
+    "review": "Quick independent review; withdrawal evidence finding fixed with regression coverage"
+  }
+}

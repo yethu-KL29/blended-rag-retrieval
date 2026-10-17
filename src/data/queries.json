@@ -1,0 +1,26 @@
+{
+  "label_provenance": {
+    "status": "unvalidated source-derived seed judgments",
+    "author": "implementation author",
+    "method": "Manually assigned target control identifiers from public NIST control titles and statements; no independent assessor review.",
+    "limits": "Incomplete qrels: other relevant controls may be unjudged. These are smoke-benchmark measurements, not validated evidence of retrieval superiority."
+  },
+  "queries": [
+    {"id": "identifier-access", "query": "ac-2 Account Management", "filters": {"release": "rev5"}, "relevant": {"rev5:ac-2": 2}},
+    {"id": "identifier-audit", "query": "au-6 Audit Record Review Analysis Reporting", "filters": {"release": "rev5"}, "relevant": {"rev5:au-6": 2}},
+    {"id": "identifier-incident", "query": "ir-4 Incident Handling", "filters": {"release": "rev4"}, "relevant": {"rev4:ir-4": 2}},
+    {"id": "semantic-leavers", "query": "Remove accounts when employees leave the organization", "filters": {"release": "rev5"}, "relevant": {"rev5:ac-2": 2}},
+    {"id": "semantic-recovery", "query": "How do we back up information and recover after a disaster?", "filters": {"release": "rev5"}, "relevant": {"rev5:cp-9": 2, "rev5:cp-10": 2}},
+    {"id": "semantic-login", "query": "Verify the identity of users before granting system access", "filters": {"release": "rev5"}, "relevant": {"rev5:ia-2": 2}},
+    {"id": "multi-audit", "query": "Generate audit records then review and analyze those records", "filters": {"release": "rev5"}, "relevant": {"rev5:au-12": 2, "rev5:au-6": 2}},
+    {"id": "multi-response", "query": "Incident response training and incident handling procedures", "filters": {"release": "rev4"}, "relevant": {"rev4:ir-2": 2, "rev4:ir-4": 2}},
+    {"id": "version-ac1-old", "query": "ac-1 Access Control Policy and Procedures", "filters": {"release": "rev4", "source_id": "nist-800-53"}, "relevant": {"rev4:ac-1": 2}},
+    {"id": "version-ac1-new", "query": "ac-1 Policy and Procedures", "filters": {"release": "rev5", "source_id": "nist-800-53"}, "relevant": {"rev5:ac-1": 2}},
+    {"id": "negative-outside-domain", "query": "banana soufflé recipe pineapple baking", "filters": {"release": "rev5"}, "relevant": {}},
+    {"id": "negative-missing-control", "query": "access management", "filters": {"release": "rev5", "control_id": "zz-999"}, "relevant": {}},
+    {"id": "physical", "query": "Physical Access Authorizations", "filters": {"release": "rev5"}, "relevant": {"rev5:pe-2": 2}},
+    {"id": "risk", "query": "Vulnerability Monitoring and Scanning", "filters": {"release": "rev5"}, "relevant": {"rev5:ra-5": 2}},
+    {"id": "transmission", "query": "Transmission Confidentiality and Integrity", "filters": {"release": "rev4"}, "relevant": {"rev4:sc-8": 2}},
+    {"id": "least-privilege", "query": "Only allow the minimum privileges needed for assigned duties", "filters": {"release": "rev5"}, "relevant": {"rev5:ac-6": 2}}
+  ]
+}
