@@ -3,24 +3,25 @@ import argparse
 import json
 import os
 import sys
+import time
 from pathlib import Path
 
 from pymongo.errors import PyMongoError
 
 from blended_rag.answers import answer, compare
 from blended_rag.dataset import load_sources
-from blended_rag.evaluation import evaluate
+from blended_rag.evaluation import evaluate, ablate
 from blended_rag.ingestion import LocalStore, parse_catalog
 from blended_rag.models import Chunk
-from blended_rag.retrieval import LocalRetriever, FaissRetriever
+from blended_rag.retrieval import LocalRetriever, FaissRetriever, RetrievalConfig, PROFILES
 from blended_rag.providers import GeminiEncoder, ProviderError, provenance
 
 
-def backend(store, name="offline", mode=None, answer_engine=None):
+def backend(store, name="offline", mode=None, answer_engine=None, config=None):
     if mode == "local":
         if answer_engine == "gemini-grounded":
             raise ValueError("Local mode requires extractive-nlp answers")
-        return FaissRetriever(store)
+        return FaissRetriever(store, config)
     if mode == "enterprise":
         name = "atlas"
         for key, value in {"MONGODB_COLLECTION": "aintropy_blended_nist_gemini768_v1",
@@ -30,9 +31,9 @@ def backend(store, name="offline", mode=None, answer_engine=None):
             if os.environ[key] != value:
                 raise ValueError("Enterprise mode requires the dedicated Gemini namespaces")
     if name == "offline":
-        return LocalRetriever(store)
+        return LocalRetriever(store, config)
     from blended_rag.atlas import AtlasRetriever
-    retriever = AtlasRetriever(store)
+    retriever = AtlasRetriever(store, config)
     if mode == "enterprise":
         if not isinstance(retriever.encoder, GeminiEncoder):
             retriever.close()
@@ -68,6 +69,10 @@ def parser():
     root.add_argument("--env-file")
     root.add_argument("--answer-engine", choices=["extractive-nlp", "gemini-grounded"])
     root.add_argument("--backend", choices=["offline", "atlas"], default="offline")
+    root.add_argument("--lexical-profile", choices=PROFILES, default="combined")
+    root.add_argument("--query-formulation", choices=["raw", "identifier"], default="raw")
+    root.add_argument("--lexical-weight", type=float, default=1.0)
+    root.add_argument("--dense-weight", type=float, default=1.0)
     sub = root.add_subparsers(dest="command", required=True)
     sub.add_parser("download", help="Redownload pinned corpus and verify SHA256")
     ingestion = sub.add_parser("ingest")
@@ -75,7 +80,8 @@ def parser():
     ingestion.add_argument("--cache", default="src/assets/corpus-minilm.npz")
     export = sub.add_parser("export-cache")
     export.add_argument("--output", default="src/assets/corpus-minilm.npz")
-    sub.add_parser("indexes", help="Create Atlas Search indexes and wait for queryable readiness")
+    indexes = sub.add_parser("indexes", help="Create Atlas Search indexes and wait for queryable readiness")
+    indexes.add_argument("--fields-only", action="store_true", help="Create only the additive field index")
     query = sub.add_parser("query")
     query.add_argument("question")
     query.add_argument("--method", choices=["lexical", "dense", "hybrid"], default="hybrid")
@@ -89,6 +95,9 @@ def parser():
     comparison.add_argument("--new", default="rev5", choices=["rev4", "rev5"])
     evaluation = sub.add_parser("evaluate")
     evaluation.add_argument("--output", default="artifacts/evaluation.json")
+    evaluation.add_argument("--methods", nargs="+", choices=["lexical", "dense", "hybrid"])
+    ablation = sub.add_parser("ablate")
+    ablation.add_argument("--output", default="artifacts/ablation.json")
     serve = sub.add_parser("serve")
     serve.add_argument("--host", default="127.0.0.1")
     serve.add_argument("--port", type=int, default=8000)
@@ -121,6 +130,7 @@ def main(argv=None):
     store = LocalStore(args.store)
     retriever = None
     try:
+        config = RetrievalConfig(args.lexical_profile, args.query_formulation, args.lexical_weight, args.dense_weight)
         if args.command == "download":
             result = {"verified_sources": [s["release"] for s, _ in load_sources(download=True)]}
         elif args.command == "ingest":
@@ -130,7 +140,7 @@ def main(argv=None):
                 raise ValueError("Explicit encoder conflicts with selected execution mode")
             result = store.ingest(chunks, expected or args.encoder or "lsa", args.cache if mode == "local" else None)
             if args.backend == "atlas":
-                retriever = backend(store, "atlas", mode, args.answer_engine)
+                retriever = backend(store, "atlas", mode, args.answer_engine, config)
                 result["atlas"] = retriever.ingest(store)
             result.update({"mode": mode or "legacy", "embedding_model": {"name": store.read()["model_name"], "fingerprint": store.read()["model_fingerprint"]},
                            "vector_engine": "faiss-IndexFlatIP" if mode == "local" else "mongodb-atlas-vector-search" if args.backend == "atlas" else "numpy-exact-cosine",
@@ -142,29 +152,33 @@ def main(argv=None):
         elif args.command == "serve":
             import uvicorn
             from blended_rag.api import create_app
-            uvicorn.run(create_app(args.store, args.backend, mode, args.answer_engine), host=args.host, port=args.port)
+            uvicorn.run(create_app(args.store, args.backend, mode, args.answer_engine, config), host=args.host, port=args.port)
             return 0
         elif args.command == "compare":
             if args.backend == "atlas":
-                retriever = backend(store, "atlas", mode, args.answer_engine)
+                retriever = backend(store, "atlas", mode, args.answer_engine, config)
                 active = retriever._filters({})
                 chunks = [Chunk(**{key: row[key] for key in Chunk.__dataclass_fields__})
                           for row in retriever.collection.find({**active, "control_id": args.control_id})]
             else:
                 if mode == "local":
-                    retriever = backend(store, args.backend, mode, args.answer_engine)
+                    retriever = backend(store, args.backend, mode, args.answer_engine, config)
                     chunks = retriever.chunks
                 else:
                     chunks = [Chunk(**c) for c in store.read()["chunks"]]
             result = compare(chunks, args.control_id, args.old, args.new)
         else:
-            retriever = backend(store, args.backend, mode, args.answer_engine)
+            setup_start = time.perf_counter()
+            retriever = backend(store, args.backend, mode, args.answer_engine, config)
+            retriever.setup_seconds = time.perf_counter() - setup_start
             if args.command == "indexes":
                 if args.backend != "atlas":
                     raise ValueError("indexes requires --backend atlas")
-                result = retriever.setup_indexes()
+                result = retriever.setup_field_index() if args.fields_only else retriever.setup_indexes()
+            elif args.command == "ablate":
+                result = ablate(retriever, store, args.output)
             elif args.command == "evaluate":
-                result = evaluate(retriever, store, args.output)
+                result = evaluate(retriever, store, args.output, methods=args.methods)
             else:
                 filters = {key: val for key, val in {"release": args.release, "control_id": args.control_id,
                                                    "source_id": args.source_id}.items() if val}
@@ -177,7 +191,7 @@ def main(argv=None):
                            "vector_engine": "faiss-IndexFlatIP" if mode == "local" else "mongodb-atlas-vector-search" if args.backend == "atlas" else "numpy-exact-cosine",
                            "answer_engine": args.answer_engine or ("gemini-grounded" if mode == "enterprise" else "extractive-nlp")})
         print(json.dumps(result, indent=2, ensure_ascii=True, allow_nan=False))
-        return 0
+        return 2 if args.command == "ablate" and result["status"] == "failed" else 0
     except (ValueError, OSError) as exc:
         print(json.dumps({"error": str(exc)}), file=sys.stderr)
         return 2

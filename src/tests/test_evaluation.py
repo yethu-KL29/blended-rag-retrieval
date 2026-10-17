@@ -41,3 +41,26 @@ def test_empty_benchmark_is_rejected(store, tmp_path):
     queries.write_text(json.dumps({"queries": []}), encoding="utf-8")
     with pytest.raises(ValueError, match="at least one query"):
         evaluate(None, store, tmp_path / "report.json", queries)
+
+
+def test_explicit_lexical_only_evaluation_never_warms_dense(store, tmp_path):
+    calls = []
+
+    class LexicalOnlyRetriever:
+        model = {"name": "lexical-only"}
+
+        def search(self, query, method, k, filters):
+            assert method == "lexical", "Explicit lexical-only evaluation called dense retrieval"
+            calls.append((method, k))
+            return []
+
+    queries = tmp_path / "queries.json"
+    queries.write_text(json.dumps({"label_provenance": "test", "queries": [
+        {"id": "one", "query": "account", "filters": {}, "relevant": {"rev5:ac-2": 1}}
+    ]}), encoding="utf-8")
+    output = tmp_path / "lexical.json"
+    evaluate(LexicalOnlyRetriever(), store, output, queries, methods=["lexical"])
+    assert calls == [("lexical", 100), ("lexical", 100)]
+    report = json.loads(output.read_text(encoding="utf-8"))
+    assert set(report["summary"]) == {"lexical"}
+    assert "per measured method" in report["measurement"]

@@ -4,6 +4,8 @@ Retrieve cited NIST SP 800-53 controls from independent source snapshots, compar
 
 See [the execution-mode architecture decision and exact local, baseline, cache-export and enterprise commands](docs/architecture-modes.md). Use `--mode local` for grading and `--mode enterprise --env-file .env` for optional private cloud configuration. Stores, model fingerprints, usage and reports remain distinct. [Current local and live enterprise results](docs/mode-benchmarks.md) are reported separately from preserved historical baselines.
 
+[Field-aware experiment results](docs/field-experiment-results.md) compare content-only, separate-field, boosted and max-field retrieval in both modes; the combined default remains unchanged.
+
 Use Python 3.11–3.13 in an isolated virtual environment. Exact grader commands are in [run.yaml](run.yaml), run from this directory:
 
 ```sh
@@ -61,3 +63,5 @@ Original assessment submission contract follows.
 Once you start the test you have until your test's time limit to complete the assignment — see your invitation email for the exact duration. We ignore any commits pushed to your repo after that.
 
 Questions? careers@aintropy.ai
+
+Field-aware lexical profiles, weighted fusion and separate local/enterprise ablations: [commands and scoring details](docs/field-aware-retrieval.md).

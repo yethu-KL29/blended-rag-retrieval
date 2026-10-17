@@ -6,6 +6,8 @@ run_commands:
   - "python src/main.py --mode local query \"How are user accounts managed?\" --release rev5 --method hybrid -k 3"
   - "python src/main.py --mode local compare ac-1 --old rev4 --new rev5"
   - "python src/main.py --mode local evaluate --output artifacts/evaluation-local.json"
+  - "python src/main.py --mode local --lexical-profile boosted-sum --query-formulation identifier query \"CP-9.1\" --method lexical --release rev5 -k 3"
+  - "python src/main.py --mode local --lexical-profile multi-field evaluate --methods lexical hybrid --output artifacts/evaluation-field-grader.json"
   - "python src/main.py --mode local ingest"
 test_commands:
   - "python -m pytest src/tests -q"

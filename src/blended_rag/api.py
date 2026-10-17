@@ -20,14 +20,16 @@ class Query(BaseModel):
     filters: dict[str, str] = Field(default_factory=dict)
 
 
-def create_app(directory=None, backend="offline", mode=None, answer_engine=None):
+def create_app(directory=None, backend="offline", mode=None, answer_engine=None, config=None):
+    from .retrieval import RetrievalConfig
+    config = config or RetrievalConfig()
     mode = mode or ("local" if directory is None and backend == "offline" else None)
     store = LocalStore(directory or f"artifacts/runtime-{mode}")
 
     @asynccontextmanager
     async def lifespan(app):
         from main import backend as make_backend
-        app.state.retriever = make_backend(store, backend, mode, answer_engine)
+        app.state.retriever = make_backend(store, backend, mode, answer_engine, config)
         app.state.query_lock = Lock()
         yield
         if hasattr(app.state.retriever, "close"):

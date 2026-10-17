@@ -60,3 +60,7 @@ python src/main.py --store artifacts/runtime-minilm evaluate --output artifacts/
 ```
 
 The full-precision baseline may download its explicitly selected pinned model. The official submission contract and historical reports remain intact; execution instructions now select the correct mode. [Independent measurements and verification](mode-benchmarks.md) cover both full-corpus modes, live Atlas/Gemini answers and the credential-free grading commands. Deterministic implementation tests include a genuine no-network ONNX encoder smoke test. Docker/Linux execution and production load remain untested.
+
+## Field-aware extension
+
+Both modes now support independently scored control ID, title, technical section ID and body fields, plus configurable RRF weights and deterministic identifier formulation. The original combined profile remains the default. Enterprise creates the additive `aintropy_nist_gemini_fields_v2` index through `indexes --fields-only`; original indexes and document embeddings remain intact. See [configuration and commands](field-aware-retrieval.md) and [separate measured results](field-experiment-results.md).

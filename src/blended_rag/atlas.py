@@ -11,14 +11,15 @@ from pymongo.operations import SearchIndexModel
 
 from .ingestion import LocalStore
 from .models import Chunk, Hit, digest, validate_filters, validate_query
-from .retrieval import rrf
+from .retrieval import rrf, RetrievalConfig, FIELD_BOOSTS, identifiers
 
 
 class AtlasRetriever:
     mode = "legacy"
     vector_engine = "mongodb-atlas-vector-search"
     answer_engine = "extractive-nlp"
-    def __init__(self, store: LocalStore):
+    def __init__(self, store: LocalStore, config=None):
+        self.config = config or RetrievalConfig()
         uri = os.getenv("MONGODB_URI")
         if not uri:
             raise ValueError("Atlas requires MONGODB_URI; configure .env.example variables in your environment")
@@ -30,6 +31,8 @@ class AtlasRetriever:
         self.collection = db[name]
         self.sources = db[name + "_sources"]
         self.text_index = os.getenv("ATLAS_TEXT_INDEX", "compliance_text")
+        self.field_index = ("aintropy_nist_gemini_fields_v2" if name == "aintropy_blended_nist_gemini768_v1"
+                            else self.text_index + "_fields_v2")
         self.vector_index = os.getenv("ATLAS_VECTOR_INDEX", "compliance_vector")
         self.encoder = store.encoder()
         self.model = {"name": self.encoder.name, "fingerprint": self.encoder.fingerprint}
@@ -61,6 +64,33 @@ class AtlasRetriever:
                 return {"indexes": [self.text_index, self.vector_index], "queryable": True}
             time.sleep(2)
         raise TimeoutError("Atlas indexes did not become queryable before timeout; inspect Atlas index status")
+
+    def field_index_definition(self):
+        # Separate index only: no document rewrite and no changes to original definitions.
+        fields = {key: {"type": "token", "normalizer": "lowercase"} for key in
+                  ["release", "source_id", "control_id", "generation", "model_fingerprint"]}
+        fields["control_id"] = [fields["control_id"], {"type": "string", "analyzer": "lucene.keyword"}]
+        fields.update({key: {"type": "string", "analyzer": "lucene.standard"} for key in
+                       ["title", "section_id", "text"]})
+        return SearchIndexModel(name=self.field_index, definition={"mappings": {"dynamic": False, "fields": fields}})
+
+    def setup_field_index(self, timeout=300):
+        start = time.perf_counter()
+        spec = self.field_index_definition()
+        existing = {i["name"]: i for i in self.collection.list_search_indexes()}
+        if self.field_index not in existing:
+            self.collection.create_search_index(spec)
+        elif existing[self.field_index].get("latestDefinition") != spec.document["definition"]:
+            raise ValueError("Existing field index differs; use an explicit migration")
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            indexes = {i["name"]: i for i in self.collection.list_search_indexes()}
+            if indexes.get(self.field_index, {}).get("queryable"):
+                return {"indexes": [self.field_index], "queryable": True,
+                        "index_setup_seconds": time.perf_counter() - start,
+                        "document_rewrites": 0, "document_embedding_requests": 0}
+            time.sleep(2)
+        raise TimeoutError("Atlas field index did not become queryable before timeout")
 
     def ingest(self, store: LocalStore):
         state = store.read()
@@ -107,24 +137,68 @@ class AtlasRetriever:
         filters = validate_filters(filters)
         if method not in {"lexical", "dense", "hybrid"}:
             raise ValueError("method must be lexical, dense or hybrid")
+        config = getattr(self, "config", RetrievalConfig())
         if method == "hybrid":
             pool = min(100, max(50, k * 5))
-            return rrf([self.search(query, "lexical", pool, filters), self.search(query, "dense", pool, filters)], k)
+            return rrf([self.search(query, "lexical", pool, filters) if config.lexical_weight else [],
+                        self.search(query, "dense", pool, filters) if config.dense_weight else []], k,
+                       weights=[config.lexical_weight, config.dense_weight])
         active = self._filters(filters)
         if not active["generation"]["$in"]:
             return []
         if method == "lexical":
             constraints = [{"in": {"path": key, "value": value["$in"]}} if isinstance(value, dict)
                            else {"equals": {"path": key, "value": value}} for key, value in active.items()]
-            pipeline = [{"$search": {"index": self.text_index, "compound": {
-                "must": [{"text": {"query": query, "path": "search_text"}}], "filter": constraints}}},
-                {"$limit": k}, {"$set": {"score": {"$meta": "searchScore"}}}]
+            ids = identifiers(query)
+            exact = config.query_formulation == "identifier" and ids
+            profile = config.lexical_profile
+            index = self.text_index if profile == "combined" else self.field_index
+            if profile == "combined":
+                clauses = [{"text": {"query": query, "path": "search_text"}}]
+            else:
+                clauses = []
+                for field, boost in config.metadata()["fields"].items():
+                    if field == "control_id":
+                        clauses.extend({"equals": {"path": field, "value": identifier,
+                                                   "score": {"boost": {"value": boost}}}} for identifier in ids)
+                    else:
+                        clauses.append({"text": {"query": query, "path": field,
+                                                  "score": {"boost": {"value": boost}}}})
+            # Combined index already maps control_id as a token; its stored IDs are lowercase.
+            if exact:
+                constraints = [*constraints, {"in": {"path": "control_id", "value": ids}}]
+            if profile == "best-fields":
+                # Max of independently scored, bounded field candidate lists; not exhaustive best_fields.
+                hits = {}
+                for clause in clauses:
+                    pipeline = [{"$search": {"index": index, "compound": {"must": [clause], "filter": constraints}}},
+                                {"$set": {"score": {"$meta": "searchScore"}}},
+                                {"$sort": {"score": -1, "chunk_id": 1}}, {"$limit": 100},
+                                {"$project": {"embedding": 0}}]
+                    for hit in self._hits(pipeline):
+                        previous = hits.get(hit.chunk.chunk_id)
+                        if previous is None or hit.score > previous.score:
+                            hits[hit.chunk.chunk_id] = hit
+                return sorted(hits.values(), key=lambda hit: (-hit.score, hit.chunk.chunk_id))[:k]
+            compound = {"filter": constraints}
+            if profile == "combined":
+                compound["must"] = clauses
+            else:
+                compound.update({"should": clauses, "minimumShouldMatch": 1})
+            pipeline = [{"$search": {"index": index, "compound": compound}},
+                        {"$limit": k}, {"$set": {"score": {"$meta": "searchScore"}}}]
+            if profile != "combined":
+                pipeline = [pipeline[0], {"$set": {"score": {"$meta": "searchScore"}}},
+                            {"$sort": {"score": -1, "chunk_id": 1}}, {"$limit": k}]
         else:
             vector = (self.encoder.encode_query(query) if hasattr(self.encoder, "encode_query") else self.encoder.encode([query])[0]).tolist()
             pipeline = [{"$vectorSearch": {"index": self.vector_index, "path": "embedding", "queryVector": vector,
                          "numCandidates": max(100, k * 20), "limit": k, "filter": active}},
                         {"$set": {"score": {"$meta": "vectorSearchScore"}}}]
         pipeline.append({"$project": {"embedding": 0}})
+        return self._hits(pipeline)
+
+    def _hits(self, pipeline):
         fields = Chunk.__dataclass_fields__
         return [Hit(Chunk(**{key: row[key] for key in fields}), float(row["score"]))
                 for row in self.collection.aggregate(pipeline, maxTimeMS=60000)]

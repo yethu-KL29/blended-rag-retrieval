@@ -28,7 +28,11 @@ def metrics(ranking: list[str], relevant: dict[str, int]) -> dict:
             "precision@10": len(set(ranking[:10]) & positive) / 10}
 
 
-def evaluate(retriever, store, output="artifacts/evaluation.json", queries=DATA / "queries.json"):
+def evaluate(retriever, store, output="artifacts/evaluation.json", queries=DATA / "queries.json", methods=None, warm_methods=False):
+    warm_methods = warm_methods or methods is not None
+    methods = ["lexical", "dense", "hybrid"] if methods is None else list(methods)
+    if not methods or len(set(methods)) != len(methods) or set(methods) - {"lexical", "dense", "hybrid"}:
+        raise ValueError("Evaluation methods must be a nonempty unique subset of lexical, dense, hybrid")
     raw = Path(queries).read_bytes()
     benchmark = json.loads(raw)
     if not benchmark["queries"]:
@@ -36,10 +40,14 @@ def evaluate(retriever, store, output="artifacts/evaluation.json", queries=DATA 
     first = benchmark["queries"][0]
     before = usage_snapshot(retriever)
     # MiniLM loads lazily on its first dense request; keep that cold start outside timing.
-    retriever.search(first["query"], "dense", 1, first["filters"])
+    if warm_methods:
+        for method in methods:
+            retriever.search(first["query"], method, 100, first["filters"])
+    else:
+        retriever.search(first["query"], "dense", 1, first["filters"])
     after_warmup = usage_snapshot(retriever)
     rows, summaries = [], {}
-    for method in ["lexical", "dense", "hybrid"]:
+    for method in methods:
         method_rows = []
         for item in benchmark["queries"]:
             start = time.perf_counter()
@@ -74,7 +82,9 @@ def evaluate(retriever, store, output="artifacts/evaluation.json", queries=DATA 
               "label_provenance": benchmark["label_provenance"], "query_file_sha256": digest(raw),
               "query_count": len(benchmark["queries"]), "corpus": manifest(),
               "python": platform.python_version(), "platform": platform.platform(),
-              "measurement": "One untimed dense warmup, then one single-process timed pass; model load/ingestion excluded. No concurrency load test.",
+              "measurement": ("One untimed first-query warmup per measured method at candidate pool 100, then one timed pass."
+                              if warm_methods else "One untimed dense warmup, then one single-process timed pass;") +
+                             " model load/ingestion excluded. No concurrency load test.",
               "retrieval_unit": "release:control_id; ranked chunk pool of 100 collapsed to unique controls",
               "resources": {"chunks": len(state["chunks"]), "store_bytes": store.path.stat().st_size,
                             "encoder_bytes": (store.directory / state["model_file"]).stat().st_size,
@@ -87,3 +97,65 @@ def evaluate(retriever, store, output="artifacts/evaluation.json", queries=DATA 
     target.write_text(json.dumps(report, indent=2, allow_nan=False), encoding="utf-8")
     return {"output": str(target), "summary": summaries, "label_provenance": benchmark["label_provenance"],
             **provenance(retriever), "usage": usage, "warmup_usage": report["warmup_usage"]}
+
+
+def ablation_configs():
+    """Predeclared Level 1/2 configurations; never selected using qrels."""
+    from .retrieval import RetrievalConfig, PROFILES
+    variants = [("level1-combined", RetrievalConfig())]
+    variants.extend(("level2-" + profile, RetrievalConfig(profile)) for profile in PROFILES if profile != "combined")
+    variants.extend([
+        ("level2-boosted-identifier", RetrievalConfig("boosted-sum", "identifier")),
+        ("level2-boosted-lexical2", RetrievalConfig("boosted-sum", lexical_weight=2.0)),
+        ("level2-boosted-dense2", RetrievalConfig("boosted-sum", dense_weight=2.0)),
+    ])
+    return variants
+
+
+def ablate(retriever, store, output="artifacts/ablation.json", queries=DATA / "queries.json"):
+    """Checkpoint every configuration, preserving failures and the frozen benchmark."""
+    from .retrieval import RetrievalConfig
+    target = Path(output)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    original = getattr(retriever, "config", RetrievalConfig())
+    configs = [("common-dense", RetrievalConfig()), *ablation_configs()]
+    raw = Path(queries).read_bytes()
+    report = {"status": "running", **provenance(retriever), "query_file_sha256": digest(raw),
+              "retriever_setup_seconds": getattr(retriever, "setup_seconds", None),
+              "index_setup_seconds": None,
+              "setup_note": "Reuses existing stores, embeddings and indexes. Index build time is recorded by indexes --fields-only separately.",
+              "protocol": "One common dense baseline; lexical/hybrid for every predeclared configuration. Pool 100; first query warms each measured method; one sequential timed pass.",
+              "limitations": ["Small independently unvalidated qrels; no default promotion or superiority claim.",
+                              "Atlas best-fields is max over a union capped at 100 candidates per field; not exhaustive Elasticsearch best_fields.",
+                              "Local BM25 fields have separate lengths/IDF; Atlas uses native field statistics and equals scores for exact IDs; scores are not cross-engine equivalents."],
+              "configurations": [{"name": name, "config": config.metadata(), "status": "pending"} for name, config in configs]}
+
+    def checkpoint():
+        temporary = target.with_suffix(target.suffix + ".tmp")
+        temporary.write_text(json.dumps(report, indent=2, allow_nan=False), encoding="utf-8")
+        temporary.replace(target)
+
+    checkpoint()
+    try:
+        for row, (name, config) in zip(report["configurations"], configs):
+            row["status"] = "running"
+            checkpoint()
+            before = usage_snapshot(retriever)
+            started = time.perf_counter()
+            retriever.config = config
+            row["configuration_setup_seconds"] = time.perf_counter() - started
+            try:
+                detail = target.parent / (target.stem + "-" + name + ".json")
+                result = evaluate(retriever, store, detail, queries,
+                                  methods=["dense"] if name == "common-dense" else ["lexical", "hybrid"], warm_methods=True)
+                row.update({"status": "complete", **result})
+            except Exception as exc:
+                # Provider exception text can contain credentials; record type only.
+                row.update({"status": "failed", "error_type": type(exc).__name__,
+                            "usage": usage_delta(before, usage_snapshot(retriever))})
+            checkpoint()
+        report["status"] = "complete" if all(row["status"] == "complete" for row in report["configurations"]) else "failed"
+        checkpoint()
+    finally:
+        retriever.config = original
+    return {"output": str(target), "status": report["status"], "configurations": report["configurations"]}

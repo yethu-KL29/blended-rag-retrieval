@@ -173,7 +173,13 @@ def usage_delta(before, after):
 
 
 def provenance(retriever):
-    return {"mode": getattr(retriever, "mode", "legacy"), "embedding_model": retriever.model,
+    from .retrieval import RetrievalConfig
+    atlas = getattr(retriever, "vector_engine", "") == "mongodb-atlas-vector-search"
+    return {"lexical_scoring": ("Atlas native text field statistics; exact control_id uses boosted equals constant scores; best-fields uses bounded candidate union"
+                                if atlas else "BM25: combined counters preserved; other profiles use independent per-field lengths and IDF, exact-token control_id"),
+            "field_search_index": getattr(retriever, "field_index", None),
+            "retrieval_config": getattr(retriever, "config", RetrievalConfig()).metadata(),
+            "mode": getattr(retriever, "mode", "legacy"), "embedding_model": retriever.model,
             "embedding_provider": "gemini" if isinstance(getattr(retriever, "encoder", None), GeminiEncoder) else "local",
             "vector_engine": getattr(retriever, "vector_engine", "numpy-exact-cosine"),
             "answer_engine": getattr(retriever, "answer_engine", "extractive-nlp"),

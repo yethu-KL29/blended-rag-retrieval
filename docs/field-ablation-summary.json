@@ -1,0 +1,955 @@
+{
+  "measured_on": "2026-10-17",
+  "query_count": 16,
+  "answerable_queries": 14,
+  "label_status": "Incomplete source-derived seed judgments, independently unvalidated",
+  "default_profile": "combined",
+  "default_unchanged": true,
+  "modes": {
+    "local": {
+      "mode": "local",
+      "embedding_model": {
+        "name": "all-MiniLM-L6-v2-onnx-quint8",
+        "fingerprint": "b92798f12178e70349dfc90957b517b582a3cd59d19c105c1a7038b53454bb4c"
+      },
+      "query_file_sha256": "34e33718f308be1d2a74327a47be14422ed6b04dd42f9a29dcccf39a47e5c371",
+      "retriever_setup_seconds": 23.564817500067875,
+      "usage_including_warmups": {},
+      "configurations": [
+        {
+          "name": "common-dense",
+          "config": {
+            "lexical_profile": "combined",
+            "query_formulation": "raw",
+            "lexical_weight": 1.0,
+            "dense_weight": 1.0,
+            "fields": {
+              "search_text": 1.0
+            },
+            "field_combination": "sum",
+            "rrf_constant": 60,
+            "hybrid_branch_candidate_limit": 100,
+            "atlas_best_fields_candidate_limit_per_field": 100,
+            "identifier_semantics": "identifier formulation restricts detected IDs to exact lowercase control_id tokens"
+          },
+          "status": "complete",
+          "summary": {
+            "dense": {
+              "recall@5": 0.9285714285714286,
+              "recall@10": 1.0,
+              "mrr": 0.8464285714285714,
+              "ndcg@10": 0.8779711783572617,
+              "precision@5": 0.22857142857142865,
+              "precision@10": 0.12142857142857147,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 1,
+              "p50_ms": 113.79865003982559,
+              "p95_ms": 159.37750003649853,
+              "sequential_queries_per_second": 8.939630228249234
+            }
+          }
+        },
+        {
+          "name": "level1-combined",
+          "config": {
+            "lexical_profile": "combined",
+            "query_formulation": "raw",
+            "lexical_weight": 1.0,
+            "dense_weight": 1.0,
+            "fields": {
+              "search_text": 1.0
+            },
+            "field_combination": "sum",
+            "rrf_constant": 60,
+            "hybrid_branch_candidate_limit": 100,
+            "atlas_best_fields_candidate_limit_per_field": 100,
+            "identifier_semantics": "identifier formulation restricts detected IDs to exact lowercase control_id tokens"
+          },
+          "status": "complete",
+          "summary": {
+            "lexical": {
+              "recall@5": 0.7857142857142857,
+              "recall@10": 0.8214285714285714,
+              "mrr": 0.7695001077354018,
+              "ndcg@10": 0.7726806850252819,
+              "precision@5": 0.18571428571428575,
+              "precision@10": 0.10000000000000002,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 0,
+              "p50_ms": 66.83759996667504,
+              "p95_ms": 162.51557500800118,
+              "sequential_queries_per_second": 14.163539842666243
+            },
+            "hybrid": {
+              "recall@5": 0.8928571428571429,
+              "recall@10": 1.0,
+              "mrr": 0.9017857142857143,
+              "ndcg@10": 0.9054637910921824,
+              "precision@5": 0.21428571428571436,
+              "precision@10": 0.12142857142857147,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 1,
+              "p50_ms": 136.88884995644912,
+              "p95_ms": 204.24064999679103,
+              "sequential_queries_per_second": 7.488483414691812
+            }
+          }
+        },
+        {
+          "name": "level2-content-only",
+          "config": {
+            "lexical_profile": "content-only",
+            "query_formulation": "raw",
+            "lexical_weight": 1.0,
+            "dense_weight": 1.0,
+            "fields": {
+              "text": 1.0
+            },
+            "field_combination": "sum",
+            "rrf_constant": 60,
+            "hybrid_branch_candidate_limit": 100,
+            "atlas_best_fields_candidate_limit_per_field": 100,
+            "identifier_semantics": "identifier formulation restricts detected IDs to exact lowercase control_id tokens"
+          },
+          "status": "complete",
+          "summary": {
+            "lexical": {
+              "recall@5": 0.6785714285714286,
+              "recall@10": 0.8214285714285714,
+              "mrr": 0.5106369820655534,
+              "ndcg@10": 0.5836337989762443,
+              "precision@5": 0.15714285714285717,
+              "precision@10": 0.10000000000000002,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 0,
+              "p50_ms": 72.32154998928308,
+              "p95_ms": 124.02062499313615,
+              "sequential_queries_per_second": 14.055202684981232
+            },
+            "hybrid": {
+              "recall@5": 0.8928571428571429,
+              "recall@10": 0.9642857142857143,
+              "mrr": 0.7410714285714286,
+              "ndcg@10": 0.7884925318197208,
+              "precision@5": 0.21428571428571436,
+              "precision@10": 0.11428571428571432,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 1,
+              "p50_ms": 180.40214997017756,
+              "p95_ms": 254.7910499270074,
+              "sequential_queries_per_second": 5.998058354374005
+            }
+          }
+        },
+        {
+          "name": "level2-multi-field",
+          "config": {
+            "lexical_profile": "multi-field",
+            "query_formulation": "raw",
+            "lexical_weight": 1.0,
+            "dense_weight": 1.0,
+            "fields": {
+              "control_id": 1.0,
+              "title": 1.0,
+              "section_id": 1.0,
+              "text": 1.0
+            },
+            "field_combination": "sum",
+            "rrf_constant": 60,
+            "hybrid_branch_candidate_limit": 100,
+            "atlas_best_fields_candidate_limit_per_field": 100,
+            "identifier_semantics": "identifier formulation restricts detected IDs to exact lowercase control_id tokens"
+          },
+          "status": "complete",
+          "summary": {
+            "lexical": {
+              "recall@5": 0.7857142857142857,
+              "recall@10": 0.8214285714285714,
+              "mrr": 0.7234920634920635,
+              "ndcg@10": 0.7394243106791093,
+              "precision@5": 0.18571428571428575,
+              "precision@10": 0.10000000000000002,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 0,
+              "p50_ms": 132.52350001130253,
+              "p95_ms": 267.42012496106327,
+              "sequential_queries_per_second": 7.024136690322146
+            },
+            "hybrid": {
+              "recall@5": 0.8571428571428571,
+              "recall@10": 1.0,
+              "mrr": 0.8554421768707483,
+              "ndcg@10": 0.8717142159810466,
+              "precision@5": 0.20000000000000004,
+              "precision@10": 0.12142857142857147,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 1,
+              "p50_ms": 258.16970004234463,
+              "p95_ms": 375.13137498172,
+              "sequential_queries_per_second": 4.069658202793997
+            }
+          }
+        },
+        {
+          "name": "level2-boosted-sum",
+          "config": {
+            "lexical_profile": "boosted-sum",
+            "query_formulation": "raw",
+            "lexical_weight": 1.0,
+            "dense_weight": 1.0,
+            "fields": {
+              "control_id": 8.0,
+              "title": 3.0,
+              "section_id": 1.5,
+              "text": 1.0
+            },
+            "field_combination": "sum",
+            "rrf_constant": 60,
+            "hybrid_branch_candidate_limit": 100,
+            "atlas_best_fields_candidate_limit_per_field": 100,
+            "identifier_semantics": "identifier formulation restricts detected IDs to exact lowercase control_id tokens"
+          },
+          "status": "complete",
+          "summary": {
+            "lexical": {
+              "recall@5": 0.6785714285714286,
+              "recall@10": 0.6785714285714286,
+              "mrr": 0.6908342284282133,
+              "ndcg@10": 0.6704894862310387,
+              "precision@5": 0.15714285714285717,
+              "precision@10": 0.07857142857142858,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 0,
+              "p50_ms": 117.74489999515936,
+              "p95_ms": 186.51092500658706,
+              "sequential_queries_per_second": 9.336696023723535
+            },
+            "hybrid": {
+              "recall@5": 0.7857142857142857,
+              "recall@10": 0.9285714285714286,
+              "mrr": 0.7644300144300145,
+              "ndcg@10": 0.791058339804547,
+              "precision@5": 0.18571428571428575,
+              "precision@10": 0.11428571428571432,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 1,
+              "p50_ms": 197.80265004374087,
+              "p95_ms": 308.0814749991987,
+              "sequential_queries_per_second": 5.035764154372733
+            }
+          }
+        },
+        {
+          "name": "level2-best-fields",
+          "config": {
+            "lexical_profile": "best-fields",
+            "query_formulation": "raw",
+            "lexical_weight": 1.0,
+            "dense_weight": 1.0,
+            "fields": {
+              "control_id": 8.0,
+              "title": 3.0,
+              "section_id": 1.5,
+              "text": 1.0
+            },
+            "field_combination": "max",
+            "rrf_constant": 60,
+            "hybrid_branch_candidate_limit": 100,
+            "atlas_best_fields_candidate_limit_per_field": 100,
+            "identifier_semantics": "identifier formulation restricts detected IDs to exact lowercase control_id tokens"
+          },
+          "status": "complete",
+          "summary": {
+            "lexical": {
+              "recall@5": 0.6785714285714286,
+              "recall@10": 0.75,
+              "mrr": 0.6726190476190477,
+              "ndcg@10": 0.685243207134094,
+              "precision@5": 0.15714285714285717,
+              "precision@10": 0.08571428571428573,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 0,
+              "p50_ms": 101.8555499613285,
+              "p95_ms": 175.6760999560356,
+              "sequential_queries_per_second": 10.01155959702502
+            },
+            "hybrid": {
+              "recall@5": 0.8214285714285714,
+              "recall@10": 0.9285714285714286,
+              "mrr": 0.7289540816326531,
+              "ndcg@10": 0.780561830929406,
+              "precision@5": 0.18571428571428575,
+              "precision@10": 0.11428571428571432,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 1,
+              "p50_ms": 236.71680002007633,
+              "p95_ms": 382.8850000281818,
+              "sequential_queries_per_second": 4.396752141322043
+            }
+          }
+        },
+        {
+          "name": "level2-boosted-identifier",
+          "config": {
+            "lexical_profile": "boosted-sum",
+            "query_formulation": "identifier",
+            "lexical_weight": 1.0,
+            "dense_weight": 1.0,
+            "fields": {
+              "control_id": 8.0,
+              "title": 3.0,
+              "section_id": 1.5,
+              "text": 1.0
+            },
+            "field_combination": "sum",
+            "rrf_constant": 60,
+            "hybrid_branch_candidate_limit": 100,
+            "atlas_best_fields_candidate_limit_per_field": 100,
+            "identifier_semantics": "identifier formulation restricts detected IDs to exact lowercase control_id tokens"
+          },
+          "status": "complete",
+          "summary": {
+            "lexical": {
+              "recall@5": 0.6785714285714286,
+              "recall@10": 0.6785714285714286,
+              "mrr": 0.6908342284282133,
+              "ndcg@10": 0.6704894862310387,
+              "precision@5": 0.15714285714285717,
+              "precision@10": 0.07857142857142858,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 0,
+              "p50_ms": 95.26005003135651,
+              "p95_ms": 265.5464749550447,
+              "sequential_queries_per_second": 9.260067908078357
+            },
+            "hybrid": {
+              "recall@5": 0.7857142857142857,
+              "recall@10": 0.9285714285714286,
+              "mrr": 0.7644300144300145,
+              "ndcg@10": 0.791058339804547,
+              "precision@5": 0.18571428571428575,
+              "precision@10": 0.11428571428571432,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 1,
+              "p50_ms": 167.47760004363954,
+              "p95_ms": 375.42995004332624,
+              "sequential_queries_per_second": 5.147783368763086
+            }
+          }
+        },
+        {
+          "name": "level2-boosted-lexical2",
+          "config": {
+            "lexical_profile": "boosted-sum",
+            "query_formulation": "raw",
+            "lexical_weight": 2.0,
+            "dense_weight": 1.0,
+            "fields": {
+              "control_id": 8.0,
+              "title": 3.0,
+              "section_id": 1.5,
+              "text": 1.0
+            },
+            "field_combination": "sum",
+            "rrf_constant": 60,
+            "hybrid_branch_candidate_limit": 100,
+            "atlas_best_fields_candidate_limit_per_field": 100,
+            "identifier_semantics": "identifier formulation restricts detected IDs to exact lowercase control_id tokens"
+          },
+          "status": "complete",
+          "summary": {
+            "lexical": {
+              "recall@5": 0.6785714285714286,
+              "recall@10": 0.6785714285714286,
+              "mrr": 0.6908342284282133,
+              "ndcg@10": 0.6704894862310387,
+              "precision@5": 0.15714285714285717,
+              "precision@10": 0.07857142857142858,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 0,
+              "p50_ms": 110.55370006943122,
+              "p95_ms": 191.57855000230484,
+              "sequential_queries_per_second": 9.555830658485798
+            },
+            "hybrid": {
+              "recall@5": 0.7142857142857143,
+              "recall@10": 0.8928571428571429,
+              "mrr": 0.7253968253968254,
+              "ndcg@10": 0.7516624367016249,
+              "precision@5": 0.17142857142857146,
+              "precision@10": 0.10714285714285718,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 1,
+              "p50_ms": 199.93125001201406,
+              "p95_ms": 288.5337749903556,
+              "sequential_queries_per_second": 5.247245450239977
+            }
+          }
+        },
+        {
+          "name": "level2-boosted-dense2",
+          "config": {
+            "lexical_profile": "boosted-sum",
+            "query_formulation": "raw",
+            "lexical_weight": 1.0,
+            "dense_weight": 2.0,
+            "fields": {
+              "control_id": 8.0,
+              "title": 3.0,
+              "section_id": 1.5,
+              "text": 1.0
+            },
+            "field_combination": "sum",
+            "rrf_constant": 60,
+            "hybrid_branch_candidate_limit": 100,
+            "atlas_best_fields_candidate_limit_per_field": 100,
+            "identifier_semantics": "identifier formulation restricts detected IDs to exact lowercase control_id tokens"
+          },
+          "status": "complete",
+          "summary": {
+            "lexical": {
+              "recall@5": 0.6785714285714286,
+              "recall@10": 0.6785714285714286,
+              "mrr": 0.6908342284282133,
+              "ndcg@10": 0.6704894862310387,
+              "precision@5": 0.15714285714285717,
+              "precision@10": 0.07857142857142858,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 0,
+              "p50_ms": 111.14905000431463,
+              "p95_ms": 214.33389998856,
+              "sequential_queries_per_second": 9.02664400230911
+            },
+            "hybrid": {
+              "recall@5": 0.7857142857142857,
+              "recall@10": 1.0,
+              "mrr": 0.8095238095238095,
+              "ndcg@10": 0.8404381401567251,
+              "precision@5": 0.18571428571428575,
+              "precision@10": 0.12142857142857147,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 1,
+              "p50_ms": 210.53199999732897,
+              "p95_ms": 310.88412503595464,
+              "sequential_queries_per_second": 4.877326103505377
+            }
+          }
+        }
+      ]
+    },
+    "enterprise": {
+      "mode": "enterprise",
+      "embedding_model": {
+        "name": "gemini-embedding-001",
+        "fingerprint": "f9630846ff3df49aa68df00c0065fbd27eab26a5d18fbefac19ca4de5719d110"
+      },
+      "query_file_sha256": "34e33718f308be1d2a74327a47be14422ed6b04dd42f9a29dcccf39a47e5c371",
+      "retriever_setup_seconds": 20.59383909997996,
+      "usage_including_warmups": {
+        "embedding_requests": 153,
+        "embedding_characters": 6219,
+        "embedding_billable_characters": 5517,
+        "generation_requests": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "thought_tokens": 0,
+        "total_tokens": 0
+      },
+      "configurations": [
+        {
+          "name": "common-dense",
+          "config": {
+            "lexical_profile": "combined",
+            "query_formulation": "raw",
+            "lexical_weight": 1.0,
+            "dense_weight": 1.0,
+            "fields": {
+              "search_text": 1.0
+            },
+            "field_combination": "sum",
+            "rrf_constant": 60,
+            "hybrid_branch_candidate_limit": 100,
+            "atlas_best_fields_candidate_limit_per_field": 100,
+            "identifier_semantics": "identifier formulation restricts detected IDs to exact lowercase control_id tokens"
+          },
+          "status": "complete",
+          "summary": {
+            "dense": {
+              "recall@5": 0.9285714285714286,
+              "recall@10": 1.0,
+              "mrr": 0.869047619047619,
+              "ndcg@10": 0.9014482364057581,
+              "precision@5": 0.22857142857142865,
+              "precision@10": 0.12142857142857147,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 1,
+              "p50_ms": 1390.4307000339031,
+              "p95_ms": 3222.3247249785345,
+              "sequential_queries_per_second": 0.539565905874477
+            }
+          }
+        },
+        {
+          "name": "level1-combined",
+          "config": {
+            "lexical_profile": "combined",
+            "query_formulation": "raw",
+            "lexical_weight": 1.0,
+            "dense_weight": 1.0,
+            "fields": {
+              "search_text": 1.0
+            },
+            "field_combination": "sum",
+            "rrf_constant": 60,
+            "hybrid_branch_candidate_limit": 100,
+            "atlas_best_fields_candidate_limit_per_field": 100,
+            "identifier_semantics": "identifier formulation restricts detected IDs to exact lowercase control_id tokens"
+          },
+          "status": "complete",
+          "summary": {
+            "lexical": {
+              "recall@5": 0.75,
+              "recall@10": 0.8214285714285714,
+              "mrr": 0.7555658627087197,
+              "ndcg@10": 0.7653813136828358,
+              "precision@5": 0.17142857142857146,
+              "precision@10": 0.10000000000000002,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 0,
+              "p50_ms": 584.6790000214241,
+              "p95_ms": 594.7658750519622,
+              "sequential_queries_per_second": 1.7167258008756814
+            },
+            "hybrid": {
+              "recall@5": 0.8928571428571429,
+              "recall@10": 1.0,
+              "mrr": 0.7946428571428571,
+              "ndcg@10": 0.8433310819989419,
+              "precision@5": 0.21428571428571436,
+              "precision@10": 0.12142857142857147,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 1,
+              "p50_ms": 3026.5665000188164,
+              "p95_ms": 6705.105299974093,
+              "sequential_queries_per_second": 0.27535683996295507
+            }
+          }
+        },
+        {
+          "name": "level2-content-only",
+          "config": {
+            "lexical_profile": "content-only",
+            "query_formulation": "raw",
+            "lexical_weight": 1.0,
+            "dense_weight": 1.0,
+            "fields": {
+              "text": 1.0
+            },
+            "field_combination": "sum",
+            "rrf_constant": 60,
+            "hybrid_branch_candidate_limit": 100,
+            "atlas_best_fields_candidate_limit_per_field": 100,
+            "identifier_semantics": "identifier formulation restricts detected IDs to exact lowercase control_id tokens"
+          },
+          "status": "complete",
+          "summary": {
+            "lexical": {
+              "recall@5": 0.75,
+              "recall@10": 0.8214285714285714,
+              "mrr": 0.48087507730364865,
+              "ndcg@10": 0.5618083083023597,
+              "precision@5": 0.17142857142857146,
+              "precision@10": 0.10000000000000002,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 0,
+              "p50_ms": 949.8797500273213,
+              "p95_ms": 1575.6547999335453,
+              "sequential_queries_per_second": 0.9788152506916793
+            },
+            "hybrid": {
+              "recall@5": 0.8571428571428571,
+              "recall@10": 1.0,
+              "mrr": 0.7936507936507936,
+              "ndcg@10": 0.8409578564937362,
+              "precision@5": 0.20000000000000004,
+              "precision@10": 0.12142857142857147,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 1,
+              "p50_ms": 3074.347349931486,
+              "p95_ms": 6797.706424986245,
+              "sequential_queries_per_second": 0.26468246136193985
+            }
+          }
+        },
+        {
+          "name": "level2-multi-field",
+          "config": {
+            "lexical_profile": "multi-field",
+            "query_formulation": "raw",
+            "lexical_weight": 1.0,
+            "dense_weight": 1.0,
+            "fields": {
+              "control_id": 1.0,
+              "title": 1.0,
+              "section_id": 1.0,
+              "text": 1.0
+            },
+            "field_combination": "sum",
+            "rrf_constant": 60,
+            "hybrid_branch_candidate_limit": 100,
+            "atlas_best_fields_candidate_limit_per_field": 100,
+            "identifier_semantics": "identifier formulation restricts detected IDs to exact lowercase control_id tokens"
+          },
+          "status": "complete",
+          "summary": {
+            "lexical": {
+              "recall@5": 0.7857142857142857,
+              "recall@10": 0.7857142857142857,
+              "mrr": 0.7209627329192548,
+              "ndcg@10": 0.7256475713369027,
+              "precision@5": 0.18571428571428575,
+              "precision@10": 0.09285714285714287,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 0,
+              "p50_ms": 1212.0522999903187,
+              "p95_ms": 1412.8948250145186,
+              "sequential_queries_per_second": 0.9228484133967507
+            },
+            "hybrid": {
+              "recall@5": 0.8928571428571429,
+              "recall@10": 1.0,
+              "mrr": 0.8303571428571429,
+              "ndcg@10": 0.8565543845344277,
+              "precision@5": 0.21428571428571436,
+              "precision@10": 0.12142857142857147,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 1,
+              "p50_ms": 3387.8129000077024,
+              "p95_ms": 6813.494450005237,
+              "sequential_queries_per_second": 0.2538360770909844
+            }
+          }
+        },
+        {
+          "name": "level2-boosted-sum",
+          "config": {
+            "lexical_profile": "boosted-sum",
+            "query_formulation": "raw",
+            "lexical_weight": 1.0,
+            "dense_weight": 1.0,
+            "fields": {
+              "control_id": 8.0,
+              "title": 3.0,
+              "section_id": 1.5,
+              "text": 1.0
+            },
+            "field_combination": "sum",
+            "rrf_constant": 60,
+            "hybrid_branch_candidate_limit": 100,
+            "atlas_best_fields_candidate_limit_per_field": 100,
+            "identifier_semantics": "identifier formulation restricts detected IDs to exact lowercase control_id tokens"
+          },
+          "status": "complete",
+          "summary": {
+            "lexical": {
+              "recall@5": 0.6428571428571429,
+              "recall@10": 0.6785714285714286,
+              "mrr": 0.6615646258503401,
+              "ndcg@10": 0.6574558855420347,
+              "precision@5": 0.14285714285714285,
+              "precision@10": 0.07857142857142858,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 0,
+              "p50_ms": 1113.425399933476,
+              "p95_ms": 1384.5635749748908,
+              "sequential_queries_per_second": 0.9708304289461507
+            },
+            "hybrid": {
+              "recall@5": 0.8214285714285714,
+              "recall@10": 1.0,
+              "mrr": 0.8214285714285714,
+              "ndcg@10": 0.837800579038029,
+              "precision@5": 0.20000000000000004,
+              "precision@10": 0.12142857142857147,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 1,
+              "p50_ms": 2064.1618999652565,
+              "p95_ms": 4454.201200045645,
+              "sequential_queries_per_second": 0.3798824330366256
+            }
+          }
+        },
+        {
+          "name": "level2-best-fields",
+          "config": {
+            "lexical_profile": "best-fields",
+            "query_formulation": "raw",
+            "lexical_weight": 1.0,
+            "dense_weight": 1.0,
+            "fields": {
+              "control_id": 8.0,
+              "title": 3.0,
+              "section_id": 1.5,
+              "text": 1.0
+            },
+            "field_combination": "max",
+            "rrf_constant": 60,
+            "hybrid_branch_candidate_limit": 100,
+            "atlas_best_fields_candidate_limit_per_field": 100,
+            "identifier_semantics": "identifier formulation restricts detected IDs to exact lowercase control_id tokens"
+          },
+          "status": "complete",
+          "summary": {
+            "lexical": {
+              "recall@5": 0.5714285714285714,
+              "recall@10": 0.6428571428571429,
+              "mrr": 0.5922619047619048,
+              "ndcg@10": 0.5939617769132663,
+              "precision@5": 0.12857142857142856,
+              "precision@10": 0.07142857142857142,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 0,
+              "p50_ms": 1221.1400500382297,
+              "p95_ms": 1534.0513499686494,
+              "sequential_queries_per_second": 0.8169515568973421
+            },
+            "hybrid": {
+              "recall@5": 0.8214285714285714,
+              "recall@10": 0.9285714285714286,
+              "mrr": 0.7428880643166357,
+              "ndcg@10": 0.7875752927873149,
+              "precision@5": 0.20000000000000004,
+              "precision@10": 0.11428571428571432,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 1,
+              "p50_ms": 3298.909150005784,
+              "p95_ms": 4493.796975031728,
+              "sequential_queries_per_second": 0.31115443876126925
+            }
+          }
+        },
+        {
+          "name": "level2-boosted-identifier",
+          "config": {
+            "lexical_profile": "boosted-sum",
+            "query_formulation": "identifier",
+            "lexical_weight": 1.0,
+            "dense_weight": 1.0,
+            "fields": {
+              "control_id": 8.0,
+              "title": 3.0,
+              "section_id": 1.5,
+              "text": 1.0
+            },
+            "field_combination": "sum",
+            "rrf_constant": 60,
+            "hybrid_branch_candidate_limit": 100,
+            "atlas_best_fields_candidate_limit_per_field": 100,
+            "identifier_semantics": "identifier formulation restricts detected IDs to exact lowercase control_id tokens"
+          },
+          "status": "complete",
+          "summary": {
+            "lexical": {
+              "recall@5": 0.6428571428571429,
+              "recall@10": 0.6785714285714286,
+              "mrr": 0.6615646258503401,
+              "ndcg@10": 0.6574558855420347,
+              "precision@5": 0.14285714285714285,
+              "precision@10": 0.07857142857142858,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 0,
+              "p50_ms": 577.4321500211954,
+              "p95_ms": 783.2260499417316,
+              "sequential_queries_per_second": 1.690784545839732
+            },
+            "hybrid": {
+              "recall@5": 0.8214285714285714,
+              "recall@10": 1.0,
+              "mrr": 0.8214285714285714,
+              "ndcg@10": 0.837800579038029,
+              "precision@5": 0.20000000000000004,
+              "precision@10": 0.12142857142857147,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 1,
+              "p50_ms": 1851.0094500961713,
+              "p95_ms": 3912.945350020891,
+              "sequential_queries_per_second": 0.3964607129482612
+            }
+          }
+        },
+        {
+          "name": "level2-boosted-lexical2",
+          "config": {
+            "lexical_profile": "boosted-sum",
+            "query_formulation": "raw",
+            "lexical_weight": 2.0,
+            "dense_weight": 1.0,
+            "fields": {
+              "control_id": 8.0,
+              "title": 3.0,
+              "section_id": 1.5,
+              "text": 1.0
+            },
+            "field_combination": "sum",
+            "rrf_constant": 60,
+            "hybrid_branch_candidate_limit": 100,
+            "atlas_best_fields_candidate_limit_per_field": 100,
+            "identifier_semantics": "identifier formulation restricts detected IDs to exact lowercase control_id tokens"
+          },
+          "status": "complete",
+          "summary": {
+            "lexical": {
+              "recall@5": 0.6428571428571429,
+              "recall@10": 0.6785714285714286,
+              "mrr": 0.6615646258503401,
+              "ndcg@10": 0.6574558855420347,
+              "precision@5": 0.14285714285714285,
+              "precision@10": 0.07857142857142858,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 0,
+              "p50_ms": 647.2550500184298,
+              "p95_ms": 931.705975002842,
+              "sequential_queries_per_second": 1.5406035847909434
+            },
+            "hybrid": {
+              "recall@5": 0.7142857142857143,
+              "recall@10": 0.7142857142857143,
+              "mrr": 0.7121482683982683,
+              "ndcg@10": 0.6893514949862237,
+              "precision@5": 0.17142857142857146,
+              "precision@10": 0.08571428571428573,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 1,
+              "p50_ms": 2790.0517999660224,
+              "p95_ms": 3924.148724967381,
+              "sequential_queries_per_second": 0.37565943874252555
+            }
+          }
+        },
+        {
+          "name": "level2-boosted-dense2",
+          "config": {
+            "lexical_profile": "boosted-sum",
+            "query_formulation": "raw",
+            "lexical_weight": 1.0,
+            "dense_weight": 2.0,
+            "fields": {
+              "control_id": 8.0,
+              "title": 3.0,
+              "section_id": 1.5,
+              "text": 1.0
+            },
+            "field_combination": "sum",
+            "rrf_constant": 60,
+            "hybrid_branch_candidate_limit": 100,
+            "atlas_best_fields_candidate_limit_per_field": 100,
+            "identifier_semantics": "identifier formulation restricts detected IDs to exact lowercase control_id tokens"
+          },
+          "status": "complete",
+          "summary": {
+            "lexical": {
+              "recall@5": 0.6428571428571429,
+              "recall@10": 0.6785714285714286,
+              "mrr": 0.6615646258503401,
+              "ndcg@10": 0.6574558855420347,
+              "precision@5": 0.14285714285714285,
+              "precision@10": 0.07857142857142858,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 0,
+              "p50_ms": 638.4371499880217,
+              "p95_ms": 909.4688499462791,
+              "sequential_queries_per_second": 1.518256983311333
+            },
+            "hybrid": {
+              "recall@5": 0.8928571428571429,
+              "recall@10": 1.0,
+              "mrr": 0.806547619047619,
+              "ndcg@10": 0.8439617769132663,
+              "precision@5": 0.21428571428571436,
+              "precision@10": 0.12142857142857147,
+              "answerable_queries": 14,
+              "negative_queries": 2,
+              "negative_queries_returning_hits": 1,
+              "p50_ms": 2053.9239500067197,
+              "p95_ms": 3865.3621000121348,
+              "sequential_queries_per_second": 0.3835392178262609
+            }
+          }
+        }
+      ]
+    }
+  },
+  "enterprise_field_index_setup": {
+    "indexes": [
+      "aintropy_nist_gemini_fields_v2"
+    ],
+    "queryable": true,
+    "index_setup_seconds": 23.625484699965455,
+    "document_rewrites": 0,
+    "document_embedding_requests": 0,
+    "retrieval_config": {
+      "lexical_profile": "combined",
+      "query_formulation": "raw",
+      "lexical_weight": 1.0,
+      "dense_weight": 1.0,
+      "fields": {
+        "search_text": 1.0
+      },
+      "field_combination": "sum",
+      "rrf_constant": 60,
+      "hybrid_branch_candidate_limit": 100,
+      "atlas_best_fields_candidate_limit_per_field": 100,
+      "identifier_semantics": "identifier formulation restricts detected IDs to exact lowercase control_id tokens"
+    },
+    "mode": "enterprise",
+    "embedding_model": {
+      "name": "gemini-embedding-001",
+      "fingerprint": "f9630846ff3df49aa68df00c0065fbd27eab26a5d18fbefac19ca4de5719d110"
+    },
+    "embedding_provider": "gemini",
+    "vector_engine": "mongodb-atlas-vector-search",
+    "answer_engine": "gemini-grounded",
+    "billing_note": "Submitted characters counted; billable characters available only when provider reports metadata; USD unpriced"
+  },
+  "limitations": [
+    "One sequential pass; environment/network not isolated",
+    "Retrieval recall is not answer accuracy",
+    "No held-out tuning, statistical superiority claim or automatic default promotion",
+    "Exact Atlas ID scores use boosted equals constants; local uses exact-token field BM25",
+    "Best-fields is maximum over bounded candidates, not Elasticsearch parity",
+    "Index/storage/invoice USD cost unavailable; embedding call counts and timing are measured"
+  ]
+}

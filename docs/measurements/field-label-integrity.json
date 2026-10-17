@@ -1,0 +1,205 @@
+{
+  "validation": "Mechanical source-ID existence only; relevance is independently unvalidated and judgments incomplete",
+  "source_hashes": {
+    "rev4": "7000457aec3526582e3c6bd1b508bb2b74623f9d44be55825c9e1af968977fbe",
+    "rev5": "01f37cf90ea99d92242c936cbfbdebcc338eef1f71454e2acac36cc56e9bc062"
+  },
+  "queries": [
+    {
+      "query_id": "identifier-access",
+      "query": "ac-2 Account Management",
+      "targets": [
+        {
+          "id": "rev5:ac-2",
+          "exists": true,
+          "title": "Account Management",
+          "grade": 2
+        }
+      ]
+    },
+    {
+      "query_id": "identifier-audit",
+      "query": "au-6 Audit Record Review Analysis Reporting",
+      "targets": [
+        {
+          "id": "rev5:au-6",
+          "exists": true,
+          "title": "Audit Record Review, Analysis, and Reporting",
+          "grade": 2
+        }
+      ]
+    },
+    {
+      "query_id": "identifier-incident",
+      "query": "ir-4 Incident Handling",
+      "targets": [
+        {
+          "id": "rev4:ir-4",
+          "exists": true,
+          "title": "Incident Handling",
+          "grade": 2
+        }
+      ]
+    },
+    {
+      "query_id": "semantic-leavers",
+      "query": "Remove accounts when employees leave the organization",
+      "targets": [
+        {
+          "id": "rev5:ac-2",
+          "exists": true,
+          "title": "Account Management",
+          "grade": 2
+        }
+      ]
+    },
+    {
+      "query_id": "semantic-recovery",
+      "query": "How do we back up information and recover after a disaster?",
+      "targets": [
+        {
+          "id": "rev5:cp-9",
+          "exists": true,
+          "title": "System Backup",
+          "grade": 2
+        },
+        {
+          "id": "rev5:cp-10",
+          "exists": true,
+          "title": "System Recovery and Reconstitution",
+          "grade": 2
+        }
+      ]
+    },
+    {
+      "query_id": "semantic-login",
+      "query": "Verify the identity of users before granting system access",
+      "targets": [
+        {
+          "id": "rev5:ia-2",
+          "exists": true,
+          "title": "Identification and Authentication (Organizational Users)",
+          "grade": 2
+        }
+      ]
+    },
+    {
+      "query_id": "multi-audit",
+      "query": "Generate audit records then review and analyze those records",
+      "targets": [
+        {
+          "id": "rev5:au-12",
+          "exists": true,
+          "title": "Audit Record Generation",
+          "grade": 2
+        },
+        {
+          "id": "rev5:au-6",
+          "exists": true,
+          "title": "Audit Record Review, Analysis, and Reporting",
+          "grade": 2
+        }
+      ]
+    },
+    {
+      "query_id": "multi-response",
+      "query": "Incident response training and incident handling procedures",
+      "targets": [
+        {
+          "id": "rev4:ir-2",
+          "exists": true,
+          "title": "Incident Response Training",
+          "grade": 2
+        },
+        {
+          "id": "rev4:ir-4",
+          "exists": true,
+          "title": "Incident Handling",
+          "grade": 2
+        }
+      ]
+    },
+    {
+      "query_id": "version-ac1-old",
+      "query": "ac-1 Access Control Policy and Procedures",
+      "targets": [
+        {
+          "id": "rev4:ac-1",
+          "exists": true,
+          "title": "Access Control Policy and Procedures",
+          "grade": 2
+        }
+      ]
+    },
+    {
+      "query_id": "version-ac1-new",
+      "query": "ac-1 Policy and Procedures",
+      "targets": [
+        {
+          "id": "rev5:ac-1",
+          "exists": true,
+          "title": "Policy and Procedures",
+          "grade": 2
+        }
+      ]
+    },
+    {
+      "query_id": "negative-outside-domain",
+      "query": "banana souffl\u00c3\u00a9 recipe pineapple baking",
+      "targets": []
+    },
+    {
+      "query_id": "negative-missing-control",
+      "query": "access management",
+      "targets": []
+    },
+    {
+      "query_id": "physical",
+      "query": "Physical Access Authorizations",
+      "targets": [
+        {
+          "id": "rev5:pe-2",
+          "exists": true,
+          "title": "Physical Access Authorizations",
+          "grade": 2
+        }
+      ]
+    },
+    {
+      "query_id": "risk",
+      "query": "Vulnerability Monitoring and Scanning",
+      "targets": [
+        {
+          "id": "rev5:ra-5",
+          "exists": true,
+          "title": "Vulnerability Monitoring and Scanning",
+          "grade": 2
+        }
+      ]
+    },
+    {
+      "query_id": "transmission",
+      "query": "Transmission Confidentiality and Integrity",
+      "targets": [
+        {
+          "id": "rev4:sc-8",
+          "exists": true,
+          "title": "Transmission Confidentiality and Integrity",
+          "grade": 2
+        }
+      ]
+    },
+    {
+      "query_id": "least-privilege",
+      "query": "Only allow the minimum privileges needed for assigned duties",
+      "targets": [
+        {
+          "id": "rev5:ac-6",
+          "exists": true,
+          "title": "Least Privilege",
+          "grade": 2
+        }
+      ]
+    }
+  ]
+}

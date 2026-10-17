@@ -1,0 +1,267 @@
+{
+  "local_default_rankings_unchanged": true,
+  "no_torch_or_google_sdk_in_grader_venv": true,
+  "grader_cloud_variables_cleared": true,
+  "grader_external_network_denied": true,
+  "windows_loopback_allowed_for_asyncio": true,
+  "commands": [
+    {
+      "command": "python src/main.py --help",
+      "exit_code": 0,
+      "elapsed_seconds": 10.37551819998771
+    },
+    {
+      "command": "python src/main.py --mode local ingest",
+      "exit_code": 0,
+      "elapsed_seconds": 36.4830643000314
+    },
+    {
+      "command": "python src/main.py --mode local query \"How are user accounts managed?\" --release rev5 --method hybrid -k 3",
+      "exit_code": 0,
+      "elapsed_seconds": 28.534122799988836
+    },
+    {
+      "command": "python src/main.py --mode local compare ac-1 --old rev4 --new rev5",
+      "exit_code": 0,
+      "elapsed_seconds": 29.82290769997053
+    },
+    {
+      "command": "python src/main.py --mode local evaluate --output artifacts/evaluation-local.json",
+      "exit_code": 0,
+      "elapsed_seconds": 40.62304570002016
+    },
+    {
+      "command": "python src/main.py --mode local --lexical-profile boosted-sum --query-formulation identifier query \"CP-9.1\" --method lexical --release rev5 -k 3",
+      "exit_code": 0,
+      "elapsed_seconds": 30.743203399935737
+    },
+    {
+      "command": "python src/main.py --mode local --lexical-profile multi-field evaluate --methods lexical hybrid --output artifacts/evaluation-field-grader.json",
+      "exit_code": 0,
+      "elapsed_seconds": 51.554381800000556
+    },
+    {
+      "command": "python src/main.py --mode local ingest",
+      "exit_code": 0,
+      "elapsed_seconds": 36.4830643000314
+    },
+    {
+      "command": "python -m pytest src/tests -q",
+      "exit_code": 0,
+      "elapsed_seconds": 40.076701599988155
+    }
+  ],
+  "tests_passed": 75,
+  "tests_skipped": 1,
+  "skip_reason": "Optional legacy disposable-collection live test",
+  "enterprise_index": {
+    "indexed_chunks": 20114,
+    "active_source_count": 2,
+    "old_index_definitions_unchanged": true,
+    "document_rewrites": 0,
+    "document_embedding_requests": 0,
+    "indexes": [
+      {
+        "name": "aintropy_nist_gemini_text_v1",
+        "type": "search",
+        "status": "READY",
+        "queryable": true,
+        "latestDefinition": {
+          "mappings": {
+            "dynamic": false,
+            "fields": {
+              "release": {
+                "type": "token"
+              },
+              "source_id": {
+                "type": "token"
+              },
+              "control_id": {
+                "type": "token"
+              },
+              "generation": {
+                "type": "token"
+              },
+              "model_fingerprint": {
+                "type": "token"
+              },
+              "title": {
+                "type": "string",
+                "analyzer": "lucene.standard"
+              },
+              "text": {
+                "type": "string",
+                "analyzer": "lucene.standard"
+              },
+              "search_text": {
+                "type": "string",
+                "analyzer": "lucene.standard"
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "aintropy_nist_gemini_fields_v2",
+        "type": "search",
+        "status": "READY",
+        "queryable": true,
+        "latestDefinition": {
+          "mappings": {
+            "dynamic": false,
+            "fields": {
+              "release": {
+                "type": "token",
+                "normalizer": "lowercase"
+              },
+              "source_id": {
+                "type": "token",
+                "normalizer": "lowercase"
+              },
+              "control_id": [
+                {
+                  "type": "token",
+                  "normalizer": "lowercase"
+                },
+                {
+                  "type": "string",
+                  "analyzer": "lucene.keyword"
+                }
+              ],
+              "generation": {
+                "type": "token",
+                "normalizer": "lowercase"
+              },
+              "model_fingerprint": {
+                "type": "token",
+                "normalizer": "lowercase"
+              },
+              "title": {
+                "type": "string",
+                "analyzer": "lucene.standard"
+              },
+              "section_id": {
+                "type": "string",
+                "analyzer": "lucene.standard"
+              },
+              "text": {
+                "type": "string",
+                "analyzer": "lucene.standard"
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "aintropy_nist_gemini_vector_v1",
+        "type": "vectorSearch",
+        "status": "READY",
+        "queryable": true,
+        "latestDefinition": {
+          "fields": [
+            {
+              "type": "vector",
+              "path": "embedding",
+              "numDimensions": 768,
+              "similarity": "cosine"
+            },
+            {
+              "type": "filter",
+              "path": "release"
+            },
+            {
+              "type": "filter",
+              "path": "source_id"
+            },
+            {
+              "type": "filter",
+              "path": "control_id"
+            },
+            {
+              "type": "filter",
+              "path": "generation"
+            },
+            {
+              "type": "filter",
+              "path": "model_fingerprint"
+            }
+          ]
+        }
+      }
+    ],
+    "independent_field_query_checks": {
+      "control_id": {
+        "hits": 5,
+        "filters_preserved": true
+      },
+      "title": {
+        "hits": 5,
+        "filters_preserved": true
+      },
+      "section_id": {
+        "hits": 5,
+        "filters_preserved": true
+      },
+      "text": {
+        "hits": 5,
+        "filters_preserved": true
+      }
+    }
+  },
+  "index_build": {
+    "indexes": [
+      "aintropy_nist_gemini_fields_v2"
+    ],
+    "queryable": true,
+    "index_setup_seconds": 23.625484699965455,
+    "document_rewrites": 0,
+    "document_embedding_requests": 0,
+    "retrieval_config": {
+      "lexical_profile": "combined",
+      "query_formulation": "raw",
+      "lexical_weight": 1.0,
+      "dense_weight": 1.0,
+      "fields": {
+        "search_text": 1.0
+      },
+      "field_combination": "sum",
+      "rrf_constant": 60,
+      "hybrid_branch_candidate_limit": 100,
+      "atlas_best_fields_candidate_limit_per_field": 100,
+      "identifier_semantics": "identifier formulation restricts detected IDs to exact lowercase control_id tokens"
+    },
+    "mode": "enterprise",
+    "embedding_model": {
+      "name": "gemini-embedding-001",
+      "fingerprint": "f9630846ff3df49aa68df00c0065fbd27eab26a5d18fbefac19ca4de5719d110"
+    },
+    "embedding_provider": "gemini",
+    "vector_engine": "mongodb-atlas-vector-search",
+    "answer_engine": "gemini-grounded",
+    "billing_note": "Submitted characters counted; billable characters available only when provider reports metadata; USD unpriced"
+  },
+  "live_field_api": {
+    "health_status": 200,
+    "query_status": 200,
+    "static_config_preserved": true,
+    "enhancement_ids_exact": true
+  },
+  "live_field_api_usage": {
+    "embedding_requests": 0,
+    "embedding_characters": 0,
+    "embedding_billable_characters": 0,
+    "generation_requests": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "thought_tokens": 0,
+    "total_tokens": 0
+  },
+  "independent_review": "Two verified findings fixed; no deferred findings",
+  "remaining_unverified": [
+    "Independent relevance judgments",
+    "Linux/Docker execution",
+    "Production load/scalability",
+    "Invoice costs",
+    "SPLADE/reranking"
+  ]
+}
