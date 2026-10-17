@@ -1,0 +1,165 @@
+{
+  "verified_on": "2026-10-17",
+  "status": "complete for declared partial corpus only",
+  "default_enabled": false,
+  "scope": {
+    "indexed_chunks": 12672,
+    "full_corpus_chunks": 20114,
+    "selection": "First checkpointed rows of the full store sorted by structural chunk ID; independent of qrels",
+    "full_corpus_comparison": false,
+    "default_enabled": false,
+    "latency_note": "SPLADE model/index were loaded for a real-search check before this shared-process comparison; first-call fields are not independent cold starts."
+  },
+  "index": {
+    "batch_size": 128,
+    "bytes": 6717259,
+    "checkpoint_size": 128,
+    "elapsed_seconds": 3689.718626799993,
+    "encoder_batch_size": 8,
+    "external_api_cost_usd": 0,
+    "file": "index-c133fd1afe206e3d9f5346a2c1ffa3a085d04487f3ba084d46a60dd44cb26324.npz",
+    "identity": {
+      "count": 12672,
+      "format": 1,
+      "model": {
+        "dimensions": 30522,
+        "max_length": 256,
+        "model": "naver/splade-cocondenser-ensembledistil",
+        "normalization": "none",
+        "pooling": "max(log1p(relu(MLM logits)))",
+        "representation": "title + control_id + text",
+        "revision": "49cf4c7b0db5b870a401ddf5e2669993ef3699c7"
+      },
+      "source": "ea29d2a1104b44d8c79c278fdbfaaf907cc1a2b4739eeab844296d5cb619b48f"
+    },
+    "license": "CC-BY-NC-SA-4.0",
+    "model_bytes": 438841543,
+    "nnz": 1317018,
+    "sha256": "b28c9b371182e6a35d342f6584dd9148a23c773ba1a182413bdf01b3b6cc05b4",
+    "threads": 4,
+    "materialization_seconds": 12.54095579998102,
+    "build_origin": "Verified persisted real SPLADE checkpoint vectors; zero additional document inference"
+  },
+  "query_file_sha256": "34e33718f308be1d2a74327a47be14422ed6b04dd42f9a29dcccf39a47e5c371",
+  "label_status": "Small independently unvalidated seed qrels; all targets present in subset",
+  "configurations": [
+    {
+      "method": "lexical",
+      "first_call_ms": 14.244699967093766,
+      "metrics": {
+        "answerable_queries": 14,
+        "mrr": 0.7586996336996338,
+        "ndcg@10": 0.754351290026643,
+        "negative_queries": 2,
+        "negative_queries_returning_hits": 0,
+        "p50_ms": 18.638750014360994,
+        "p95_ms": 27.31499998481013,
+        "precision@10": 0.10000000000000002,
+        "precision@5": 0.15714285714285717,
+        "recall@10": 0.8214285714285714,
+        "recall@5": 0.7142857142857143,
+        "sequential_queries_per_second": 50.54073850865216
+      },
+      "report": "measurements/splade-partial-lexical.json.gz"
+    },
+    {
+      "method": "dense",
+      "first_call_ms": 1215.9372000023723,
+      "metrics": {
+        "answerable_queries": 14,
+        "mrr": 0.7757936507936508,
+        "ndcg@10": 0.8327508753545079,
+        "negative_queries": 2,
+        "negative_queries_returning_hits": 1,
+        "p50_ms": 66.33760000113398,
+        "p95_ms": 87.85844998783432,
+        "precision@10": 0.12142857142857147,
+        "precision@5": 0.21428571428571436,
+        "recall@10": 1.0,
+        "recall@5": 0.8928571428571429,
+        "sequential_queries_per_second": 15.0471030767198
+      },
+      "report": "measurements/splade-partial-dense.json.gz"
+    },
+    {
+      "method": "sparse",
+      "first_call_ms": 150.5227000452578,
+      "metrics": {
+        "answerable_queries": 14,
+        "mrr": 0.8452380952380952,
+        "ndcg@10": 0.8844845474486922,
+        "negative_queries": 2,
+        "negative_queries_returning_hits": 1,
+        "p50_ms": 170.4370499937795,
+        "p95_ms": 204.1870749089867,
+        "precision@10": 0.12142857142857147,
+        "precision@5": 0.20000000000000004,
+        "recall@10": 1.0,
+        "recall@5": 0.8571428571428571,
+        "sequential_queries_per_second": 5.9785171708157225
+      },
+      "report": "measurements/splade-partial-sparse.json.gz"
+    },
+    {
+      "method": "hybrid",
+      "first_call_ms": 84.41740006674081,
+      "metrics": {
+        "answerable_queries": 14,
+        "mrr": 0.8303571428571429,
+        "ndcg@10": 0.8674579913168357,
+        "negative_queries": 2,
+        "negative_queries_returning_hits": 1,
+        "p50_ms": 85.79060004558414,
+        "p95_ms": 123.55327501427382,
+        "precision@10": 0.12142857142857147,
+        "precision@5": 0.20000000000000004,
+        "recall@10": 1.0,
+        "recall@5": 0.8571428571428571,
+        "sequential_queries_per_second": 11.302199913848819
+      },
+      "report": "measurements/splade-partial-hybrid.json.gz"
+    },
+    {
+      "method": "blended",
+      "first_call_ms": 254.37960005365312,
+      "metrics": {
+        "answerable_queries": 14,
+        "mrr": 0.9030612244897959,
+        "ndcg@10": 0.8908186828071204,
+        "negative_queries": 2,
+        "negative_queries_returning_hits": 1,
+        "p50_ms": 246.49950000457466,
+        "p95_ms": 380.68889995338395,
+        "precision@10": 0.11428571428571432,
+        "precision@5": 0.20000000000000004,
+        "recall@10": 0.9642857142857143,
+        "recall@5": 0.8571428571428571,
+        "sequential_queries_per_second": 3.7002614328781114
+      },
+      "report": "measurements/splade-partial-blended.json.gz"
+    }
+  ],
+  "full_corpus_splade_benchmark": "not completed",
+  "interfaces": {
+    "default": {
+      "status": 0,
+      "citations": 3,
+      "wall_seconds": 37.619808099931106
+    },
+    "sparse": {
+      "status": 0,
+      "citations": 2,
+      "wall_seconds": 41.753299699979834
+    },
+    "api-sparse": {
+      "status": 200,
+      "citations": 3,
+      "wall_seconds": null
+    },
+    "api-blended": {
+      "status": 200,
+      "citations": 3,
+      "wall_seconds": null
+    }
+  }
+}

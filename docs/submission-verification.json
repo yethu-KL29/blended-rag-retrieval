@@ -79,12 +79,14 @@
     "answer_engine": "extractive-nlp"
   },
   "splade_full_corpus": {
-    "status": "unfinished; stopped at user request to conclude",
-    "completed_chunks": 7168,
+    "status": "partial due to CPU-resource budget; disabled by default",
+    "completed_chunks": 12672,
     "total_chunks": 20114,
-    "checkpoint_elapsed_seconds": 2112.302876300062,
-    "nnz_in_completed_batches": 743168,
-    "benchmark_status": "not run",
+    "checkpoint_batches": 99,
+    "checkpoint_elapsed_seconds": 3689.718626799993,
+    "nnz_in_completed_batches": 1317018,
+    "full_ready_index_published": false,
+    "benchmark_status": "full corpus not evaluated",
     "resume_command": "python src/main.py --mode local sparse-index --batch-size 8 --checkpoint-size 128 --threads 4"
   },
   "limitations": [
@@ -92,5 +94,28 @@
     "Full SPLADE benchmark is not complete; no quality results claimed.",
     "Small independently unvalidated evaluation qrels.",
     "Docker/Linux execution and production load remain unverified."
-  ]
+  ],
+  "run_yaml_hash_scope": "Git-committed file bytes (LF); Windows working-tree CRLF conversion does not change the verified YAML command values.",
+  "splade_optional_partial": {
+    "default_enabled": false,
+    "indexed_chunks": 12672,
+    "ready_index_published": true,
+    "index_sha256": "b28c9b371182e6a35d342f6584dd9148a23c773ba1a182413bdf01b3b6cc05b4",
+    "index_bytes": 6717259,
+    "disk_reload": "exact",
+    "repeat_index_changed": false,
+    "new_document_inference_for_materialization": 0,
+    "five_methods": "complete on same declared partial corpus",
+    "cli_sparse": "passed",
+    "api_sparse_and_blended": "passed",
+    "real_cached_model_smoke": "1 passed",
+    "default_full_corpus_sparse_model": null,
+    "default_full_corpus_sparse_weight": 0,
+    "summary": "splade-partial-summary.json"
+  },
+  "completion_documentation_review": {
+    "measured_results_gap": "Resolved by publishing the explicitly scoped partial experiment following the user resource-budget change.",
+    "hash_scope": "Git LF recipe hash verified; Windows working-tree differs only by CRLF.",
+    "unresolved_findings": 0
+  }
 }

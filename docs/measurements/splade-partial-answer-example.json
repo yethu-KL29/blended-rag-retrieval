@@ -1,0 +1,113 @@
+{
+  "scope": {
+    "indexed_chunks": 12672,
+    "full_corpus_chunks": 20114,
+    "selection": "First checkpointed rows of the full store sorted by structural chunk ID; independent of qrels",
+    "full_corpus_comparison": false,
+    "default_enabled": false
+  },
+  "payload": {
+    "answer": "\"Access control policy procedures addressing account management system design documentation system configuration settings and associated documentation system-generated list of privileged user accounts and associated roles records of actions taken when privileged role assignments are no longer appropriate system audit records audit tracking and monitoring reports system monitoring records system security plan other relevant documents or records\" [2]\n\n\"Privileged roles are organization-defined roles assigned to individuals that allow those individuals to perform certain security-relevant functions that ordinary users are not authorized to perform.\" [4]\n\n\"Privileged roles include key management, account management, database administration, system and network administration, and web administration.\" [4]\n\n\"A role-based access scheme organizes permitted system access and privileges into roles.\" [4]\n\n\"In contrast, an attribute-based access scheme specifies allowed system access and privileges based on attributes.\" [4]",
+    "lexical_scoring": "Indexed BM25 postings: combined statistics preserved; other profiles use independent per-field lengths and IDF, exact-token control_id",
+    "field_search_index": null,
+    "retrieval_config": {
+      "lexical_profile": "combined",
+      "query_formulation": "raw",
+      "lexical_weight": 1.0,
+      "dense_weight": 1.0,
+      "sparse_weight": 0.0,
+      "fields": {
+        "search_text": 1.0
+      },
+      "field_combination": "sum",
+      "rrf_constant": 60,
+      "hybrid_branch_candidate_limit": 100,
+      "atlas_best_fields_candidate_limit_per_field": 100,
+      "identifier_semantics": "identifier formulation restricts detected IDs to exact lowercase control_id tokens"
+    },
+    "sparse_model": {
+      "model": "naver/splade-cocondenser-ensembledistil",
+      "revision": "49cf4c7b0db5b870a401ddf5e2669993ef3699c7",
+      "dimensions": 30522,
+      "max_length": 256,
+      "representation": "title + control_id + text",
+      "pooling": "max(log1p(relu(MLM logits)))",
+      "normalization": "none"
+    },
+    "sparse_index": {
+      "batch_size": 128,
+      "build_origin": "Verified persisted real SPLADE checkpoint vectors; zero additional document inference",
+      "bytes": 6717259,
+      "checkpoint_size": 128,
+      "elapsed_seconds": 3689.718626799993,
+      "encoder_batch_size": 8,
+      "external_api_cost_usd": 0,
+      "file": "index-c133fd1afe206e3d9f5346a2c1ffa3a085d04487f3ba084d46a60dd44cb26324.npz",
+      "identity": {
+        "count": 12672,
+        "format": 1,
+        "model": {
+          "dimensions": 30522,
+          "max_length": 256,
+          "model": "naver/splade-cocondenser-ensembledistil",
+          "normalization": "none",
+          "pooling": "max(log1p(relu(MLM logits)))",
+          "representation": "title + control_id + text",
+          "revision": "49cf4c7b0db5b870a401ddf5e2669993ef3699c7"
+        },
+        "source": "ea29d2a1104b44d8c79c278fdbfaaf907cc1a2b4739eeab844296d5cb619b48f"
+      },
+      "license": "CC-BY-NC-SA-4.0",
+      "materialization_seconds": 12.54095579998102,
+      "model_bytes": null,
+      "nnz": 1317018,
+      "sha256": "b28c9b371182e6a35d342f6584dd9148a23c773ba1a182413bdf01b3b6cc05b4",
+      "threads": 4
+    },
+    "mode": "local",
+    "embedding_model": {
+      "name": "all-MiniLM-L6-v2-onnx-quint8",
+      "fingerprint": "b92798f12178e70349dfc90957b517b582a3cd59d19c105c1a7038b53454bb4c"
+    },
+    "embedding_provider": "local",
+    "vector_engine": "faiss-IndexFlatIP",
+    "answer_engine": "extractive-nlp",
+    "billing_note": "Submitted characters counted; billable characters available only when provider reports metadata; USD unpriced",
+    "usage": {},
+    "answer_validation": "Exact source sentences; relevance heuristic is not calibrated",
+    "citations": [
+      {
+        "citation_id": 2,
+        "chunk_id": "4dcf546cfecaaad1d8e9695396532dbfc8a0303b7b2b8a74b46007434d4ef0e1",
+        "source_id": "nist-800-53",
+        "release": "rev5",
+        "control_id": "ac-2.7",
+        "section_id": "ac-2.7_asm-examine/assessment-objects[0]:0",
+        "title": "Privileged User Accounts",
+        "text": "Access control policy procedures addressing account management system design documentation system configuration settings and associated documentation system-generated list of privileged user accounts and associated roles records of actions taken when privileged role assignments are no longer appropriate system audit records audit tracking and monitoring reports system monitoring records system security plan other relevant documents or records",
+        "source_url": "https://raw.githubusercontent.com/usnistgov/oscal-content/78650f02ad9321bb7b817846f8fbd4f2bcd620de/nist.gov/SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json",
+        "source_hash": "01f37cf90ea99d92242c936cbfbdebcc338eef1f71454e2acac36cc56e9bc062",
+        "content_hash": "65ecbaf65c1dc3bd1920fcda2093b8325e4bd98fa6309d79696ff913335880e1",
+        "score": 18.014135360717773
+      },
+      {
+        "citation_id": 4,
+        "chunk_id": "38a08a034d883026e2f3c95f7a1f407f35b63629f10fb290df1231c86feed973",
+        "source_id": "nist-800-53",
+        "release": "rev5",
+        "control_id": "ac-2.7",
+        "section_id": "ac-2.7_gdn:0",
+        "title": "Privileged User Accounts",
+        "text": "Privileged roles are organization-defined roles assigned to individuals that allow those individuals to perform certain security-relevant functions that ordinary users are not authorized to perform. Privileged roles include key management, account management, database administration, system and network administration, and web administration. A role-based access scheme organizes permitted system access and privileges into roles. In contrast, an attribute-based access scheme specifies allowed system access and privileges based on attributes.",
+        "source_url": "https://raw.githubusercontent.com/usnistgov/oscal-content/78650f02ad9321bb7b817846f8fbd4f2bcd620de/nist.gov/SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json",
+        "source_hash": "01f37cf90ea99d92242c936cbfbdebcc338eef1f71454e2acac36cc56e9bc062",
+        "content_hash": "dd0ddb092caaabf66ffaf4919d5ab4d22917381ed8a31ce9451dd083f716452e",
+        "score": 17.37010955810547
+      }
+    ],
+    "releases": [
+      "rev5"
+    ],
+    "notice": ""
+  }
+}

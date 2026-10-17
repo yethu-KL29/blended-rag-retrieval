@@ -4,6 +4,8 @@ Local indexed BM25 + bundled quantized ONNX MiniLM/FAISS + explicitly optional S
 
 The [reproduction/evidence guide](grading-guide.md) maps each requested deliverable to code, commands and meaningful tests. [Detailed architecture diagrams](system-architecture.md) show independent indexes, query branches, fusion, answers and deployment boundaries.
 
+The [end-to-end implementation guide](END_TO_END_IMPLEMENTATION.md) is the standalone explanation for a reader or another agent: data, parsing, fitting versus pretrained inference, index formats, ranking, answers, cloud fallback, metrics, execution, testing, operations and limits.
+
 ```mermaid
 flowchart LR
   N[Pinned NIST catalogs] --> P[Hash verification and structural chunks]

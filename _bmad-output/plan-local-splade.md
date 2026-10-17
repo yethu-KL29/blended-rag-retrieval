@@ -3,7 +3,7 @@ title: 'Local three-retriever Blended RAG with SPLADE'
 type: 'feature'
 ticket: ''
 created: '2026-10-17'
-status: 'in-progress'
+status: 'built'
 baseline_revision: '203eab47fa56b3fb5b29231b7f14b84533e015bd'
 route: 'full'
 route_source: 'auto'
@@ -48,15 +48,15 @@ Default grader commands remain offline, free of cloud keys, Torch and model down
 
 ## Tasks & Acceptance
 
-- [ ] Add persisted BM25 inverted postings (SciPy CSC/CSR or equivalent) for combined and separate fields; no full per-term document scans at query time. Bind format/tokenizer/k1/b, ordered complete chunks and field definitions; validate shape/finiteness/hash, atomic writes. Preserve reference statistics/API as needed for regression; compare scores against brute-force for all profiles and filters.
-- [ ] Add lazy `SparseEncoder` provider for `naver/splade-cocondenser-ensembledistil`, pinned revision `49cf4c7b0db5b870a401ddf5e2669993ef3699c7`, CPU max256, bounded threads/batches. Use actual `encode_document` and `encode_query`, raw nonnegative SPLADE weights and dot product, never dense normalization or query lookup. Model has30522 vocabulary dimensions; document input is title + control ID + text, disclosed separately from field-aware BM25.
-- [ ] Add separate persistent sparse store/index and explicit `sparse-index` command with resumable small batch checkpoints, progress/usage/timing, integrity checks and atomic ready manifest. Validate counts, finite nonnegative weights, vocab shape, full source/model identity and file digests. Do not materialize corpus-by-vocabulary dense arrays; only N-document scores may be dense. Setup may explicitly download pinned weights; queries are local-files-only. Include model/revision/license/resource provenance and optional dependencies separate from base.
-- [ ] Add `sparse` direct retrieval and `blended` weighted three-way RRF, with `sparse_weight` default0 so old defaults remain unchanged; explicit blended requires positive sparse weight and ready sparse index. Sparse-only can run directly; hybrid stays two-way. Filter before top-k, deterministic ties, zero-weight branch skipping, exact source citations/NLP answers. Wire CLI/API and reject sparse selection on Atlas without affecting hybrid.
-- [ ] Add a sparse evaluation command covering BM25-only, neural dense-only, SPLADE-only, two-way hybrid and three-way blended on the same frozen queries. Preserve field-aware options and report input representations, index build time/bytes/nnz, model disk size, cold/warm latency, Recall@10/MRR/NDCG/p95 and external API cost0. Store each completed configuration separately, flag failures, return nonzero if incomplete. Do not promote sparse to default from small seeds alone.
-- [ ] Test matrix, format/source/model mismatch, batch resume/failure atomicity, sparse dot products, FAISS/default regression, CLI/API methods, Atlas rejection and no-Torch/no-key default operation. Use fake encoder only in deterministic tests, clearly distinguished from root actual-model evidence. Provide a gated real-model smoke path using cached weights.
-- [ ] Update README, architecture, setup/dependencies and exact commands: local primary, Mongo hybrid fallback, optional model download then offline operation, no automatic switching, scope/limits and CC-BY-NC-SA-4.0 model attribution. Keep official template/run.yaml functional without requiring SPLADE. Previous enterprise-first decision is superseded, historical measurements remain labeled.
+- [x] Add persisted BM25 inverted postings (SciPy CSC/CSR or equivalent) for combined and separate fields; no full per-term document scans at query time. Bind format/tokenizer/k1/b, ordered complete chunks and field definitions; validate shape/finiteness/hash, atomic writes. Preserve reference statistics/API as needed for regression; compare scores against brute-force for all profiles and filters.
+- [x] Add lazy `SparseEncoder` provider for `naver/splade-cocondenser-ensembledistil`, pinned revision `49cf4c7b0db5b870a401ddf5e2669993ef3699c7`, CPU max256, bounded threads/batches. Use actual `encode_document` and `encode_query`, raw nonnegative SPLADE weights and dot product, never dense normalization or query lookup. Model has30522 vocabulary dimensions; document input is title + control ID + text, disclosed separately from field-aware BM25.
+- [x] Add separate persistent sparse store/index and explicit `sparse-index` command with resumable small batch checkpoints, progress/usage/timing, integrity checks and atomic ready manifest. Validate counts, finite nonnegative weights, vocab shape, full source/model identity and file digests. Do not materialize corpus-by-vocabulary dense arrays; only N-document scores may be dense. Setup may explicitly download pinned weights; queries are local-files-only. Include model/revision/license/resource provenance and optional dependencies separate from base.
+- [x] Add `sparse` direct retrieval and `blended` weighted three-way RRF, with `sparse_weight` default0 so old defaults remain unchanged; explicit blended requires positive sparse weight and ready sparse index. Sparse-only can run directly; hybrid stays two-way. Filter before top-k, deterministic ties, zero-weight branch skipping, exact source citations/NLP answers. Wire CLI/API and reject sparse selection on Atlas without affecting hybrid.
+- [x] Add a sparse evaluation command covering BM25-only, neural dense-only, SPLADE-only, two-way hybrid and three-way blended on the same frozen queries. Preserve field-aware options and report input representations, index build time/bytes/nnz, model disk size, cold/warm latency, Recall@10/MRR/NDCG/p95 and external API cost0. Store each completed configuration separately, flag failures, return nonzero if incomplete. Do not promote sparse to default from small seeds alone.
+- [x] Test matrix, format/source/model mismatch, batch resume/failure atomicity, sparse dot products, FAISS/default regression, CLI/API methods, Atlas rejection and no-Torch/no-key default operation. Use fake encoder only in deterministic tests, clearly distinguished from root actual-model evidence. Provide a gated real-model smoke path using cached weights.
+- [x] Update README, architecture, setup/dependencies and exact commands: local primary, Mongo hybrid fallback, optional model download then offline operation, no automatic switching, scope/limits and CC-BY-NC-SA-4.0 model attribution. Keep official template/run.yaml functional without requiring SPLADE. Previous enterprise-first decision is superseded, historical measurements remain labeled.
 
-**Acceptance:** Given existing corpus/dense store and pinned optional weights, root indexes all20114 chunks once, queries with real SPLADE and compares all five methods. Given no cloud settings/Torch, every default grader command succeeds using neural MiniLM/FAISS and indexed BM25. Given Mongo fallback, hybrid still works and sparse requests fail clearly.
+**Original full-corpus acceptance (superseded by the resource-budget decision below):** Given existing corpus/dense store and pinned optional weights, root indexes all20114 chunks once, queries with real SPLADE and compares all five methods. Given no cloud settings/Torch, every default grader command succeeds using neural MiniLM/FAISS and indexed BM25. Given Mongo fallback, hybrid still works and sparse requests fail clearly.
 
 ## Implementation Notes
 
@@ -87,3 +87,26 @@ User requested meaningful tests, documentation, architecture diagrams and explan
 Implementation and independent review fixes are complete. Root regression:89 passed/2 gated skips. All9 literal run.yaml run/test commands passed in isolated base-only environment with external network/DNS denied and cloud variables cleared; final tests were replayed after review fixes. Live Atlas/Gemini hybrid returned3 citations with extractive answers. See docs/submission-verification.json.
 
 User requested conclusion before the long CPU job finished. Full SPLADE indexing stopped at 7168/20114 persisted chunks, with no ready full-corpus index or five-method benchmark published. Checkpoints remain resumable. Plan is intentionally not marked built: full-corpus acceptance and final measurements remain incomplete.
+
+## Resumed completion and standalone guide
+
+User explicitly resumed the full-corpus SPLADE work and requested a standalone A-to-Z implementation guide, including training/fitting distinctions, updated README and publication of both on main. Resume56 valid128-document checkpoints, complete all20114 rows, verify cached-only ready reload/idempotence, real CLI/API searches and all-five comparison. Add docs/END_TO_END_IMPLEMENTATION.md with source-grounded data/model/index/retrieval/answer/evaluation/operations details and embedded measured results. Update old stale SPLADE-future wording while preserving historical measurements. User authorization now includes feature-branch and main pushes after verification.
+
+## Completion documentation review triage
+
+| Finding | Verdict | Evidence and resolution |
+|---|---|---|
+| Full measured-results placeholder and old partial status remain | medium | Verified: the complete runtime job is still executing and the doc has not been committed. This is the outstanding accepted publication step; fill actual results, commit raw evidence and update the status before handoff. |
+| Current recipe hash allegedly differs because notes changed | false | Verified current Git blob SHA256 equals e790331b... in the recorded proof; bytewise comparison shows only Windows CRLF versus Git LF. The notes were included before verification. Added explicit Git-byte hash scope so another reader can reproduce it across platforms. |
+
+## Final accepted resource-budget scope
+
+User explicitly stopped full SPLADE inference and requested optional/default-disabled status with honest partial counts. This supersedes the earlier full-corpus SPLADE acceptance, not the complete20114-chunk default BM25/MiniLM solution. CPU encoding stopped with99 complete batches /12672 chunks /1317018 nonzero weights. Full-store sparse ready pointer remains absent.
+
+An isolated partial store was materialized from the verified actual checkpoint vectors and matching genuine MiniLM cache; zero further document inference. It has a valid CSR ready index, exact disk reload/idempotence, fresh sparse CLI and real sparse/blended API checks, and a complete five-method experiment on the same12672 documents. All qrel targets are present, and every published report is explicitly partial. A fresh base-only default CLI returned sparse_weight0 / no sparse model. All external networking/cloud variables were denied in verification.
+
+Standalone guide and README now cover the whole implementation, training-versus-inference distinctions, exact commands, complete frozen questions, actual partial metrics, disk paths/hashes, resource costs and unverified full-corpus SPLADE limits. The prior documentation-results review gap is resolved by actual scoped reports and the new accepted resource limit. Git LF hash provenance is explicit. No remaining review finding is deferred.
+
+Final validation:89 base tests /2 optional skips and all9 grading commands previously passed; source pipeline has not changed since. Real cached SPLADE smoke:1 passed. Actual partial index/search/CLI/API/five-way checks all passed. Documentation/report link, metric and scope checks run before commit. User authorizes publishing the feature branch followed by main.
+
+Final revised acceptance is achieved: optional SPLADE stays off, all recorded subset checks pass, and the default full-corpus path remains intact. Full-corpus SPLADE completion is explicitly outside the user-approved resource scope and not claimed.

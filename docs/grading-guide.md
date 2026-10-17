@@ -13,10 +13,12 @@ There are three explicit configurations:
 | Configuration | Retrieval | Setup | Evidence |
 |---|---|---|---|
 | Default local | BM25 + neural MiniLM/FAISS + two-way RRF | `requirements.txt`; local `ingest` | [Existing local measurements](mode-benchmarks.md) |
-| Optional local research | BM25 + MiniLM/FAISS + SPLADE + three-way RRF | `requirements-sparse.txt`; `sparse-setup`; `sparse-index` | [Sparse implementation and measurement protocol](local-splade.md); a full benchmark is complete only when every configuration in its generated report is complete |
+| Optional local research (off by default) | BM25 + MiniLM/FAISS + SPLADE + three-way RRF | `requirements-sparse.txt`; `sparse-setup`; `sparse-index` | [Verified partial results](splade-partial-summary.json) cover 12,672 chunks; full-corpus SPLADE remains unfinished |
 | Explicit cloud fallback | Atlas BM25 + Gemini dense + two-way RRF | `requirements-enterprise.txt`; private configuration | [Separate live Atlas/Gemini measurements](mode-benchmarks.md) |
 
 There is no automatic substitution between these modes. `hybrid` always means two-way lexical/dense fusion; `blended` explicitly requests three-way local fusion with positive sparse weight. Missing optional model/index files fail with setup guidance. Current verification status belongs in the associated measurement report; an implemented command alone is not evidence of its execution.
+
+CPU constraints stopped SPLADE document inference at 12,672/20,114 chunks. The saved actual vectors were assembled and searched in a separate partial store without further document encoding. Its complete five-method comparison applies only to that subset; it cannot be presented as a full-corpus result or a controlled comparison against the historical 20,114-chunk baselines. The default BM25/MiniLM system still uses all 20,114 chunks and does not load SPLADE. The [standalone guide](END_TO_END_IMPLEMENTATION.md) explains every stage and records the exact partial scope.
 
 ## Requirement-to-evidence map
 

@@ -4,6 +4,8 @@ Retrieve cited NIST SP 800-53 controls from independent source snapshots, compar
 
 Review the [requirement-to-evidence and test guide](docs/grading-guide.md) and [indexing, retrieval and deployment diagrams](docs/system-architecture.md). These identify what the default commands execute and which optional checks require additional setup.
 
+For a complete source-grounded explanation, read [the end-to-end implementation guide](docs/END_TO_END_IMPLEMENTATION.md). It covers every pipeline stage, what was fitted versus pretrained, disk indexes and real query execution, answers, evaluation formulas, operations, exact commands and known limits.
+
 See [the execution-mode architecture decision and exact local, baseline, cache-export and enterprise commands](docs/architecture-modes.md). Use `--mode local` for grading and `--mode enterprise --env-file .env` for optional private cloud configuration. Stores, model fingerprints, usage and reports remain distinct. [Current local and live enterprise results](docs/mode-benchmarks.md) are reported separately from preserved historical baselines.
 
 [Field-aware experiment results](docs/field-experiment-results.md) compare content-only, separate-field, boosted and max-field retrieval in both modes; the combined default remains unchanged.
@@ -33,7 +35,7 @@ python src/main.py --store artifacts/runtime-minilm query "Remove access for dep
 python src/main.py --store artifacts/runtime-minilm evaluate --output artifacts/evaluation-minilm.json
 ```
 
-MiniLM downloads its pinned model on first use. It has now been executed locally on all 20,114 chunks; the small benchmark's labels remain unvalidated. See `docs/experiment-summary.json` for the comparison and `docs/measurements/` for complete compressed rankings. Use separate stores/Atlas collections for different embedding models. Unchanged ingestion embeds zero chunks; changed LSA corpora refit all vectors, while MiniLM reuses unchanged chunk vectors.
+This optional full-precision MiniLM baseline downloads its pinned model on first use; the default ONNX model is bundled. The full-precision baseline has been executed locally on all 20,114 chunks; the small benchmark's labels remain unvalidated. See `docs/experiment-summary.json` for the comparison and `docs/measurements/` for complete compressed rankings. Use separate stores/Atlas collections for different embedding models. Unchanged ingestion embeds zero chunks; changed LSA corpora refit all vectors, while MiniLM reuses unchanged chunk vectors.
 
 Enterprise setup uses the dedicated Gemini collection and indexes listed in [architecture-modes.md](docs/architecture-modes.md). Install the optional dependencies and explicitly load private configuration:
 
@@ -48,7 +50,9 @@ python src/main.py --mode enterprise --env-file .env serve
 
 The cloud fallback uses `gemini-embedding-001` (768 dimensions), Atlas BM25/vector retrieval and client RRF. The answer model is configurable through `GEMINI_CHAT_MODEL`; the historical live POC used `gemini-3.1-flash-lite`. Local answers use extractive NLP and require no generative model. Enterprise failures remain enterprise errors; no automatic local substitution occurs.
 
-Optional SPLADE is a separate explicit setup, index and retrieval path. Install its dependencies only in an optional environment (CPU Torch can be installed from the PyTorch CPU package index):
+**SPLADE is optional and disabled by default** (`sparse_weight=0`; default `hybrid` searches only BM25 + MiniLM/FAISS). Real SPLADE vectors for **12,672 of 20,114 chunks** were saved before the CPU-resource-limited full indexing run was stopped. Full-corpus SPLADE indexing and benchmarking remain unfinished; partial-corpus evidence is identified separately in the [end-to-end guide](docs/END_TO_END_IMPLEMENTATION.md). The default full-corpus application and `run.yaml` do not depend on SPLADE.
+
+Optional SPLADE has a separate explicit setup, index and retrieval path. Install its dependencies only in an optional environment (CPU Torch can be installed from the PyTorch CPU package index):
 
 ```sh
 python -m pip install -r requirements-sparse.txt

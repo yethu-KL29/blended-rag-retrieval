@@ -14,5 +14,6 @@ artifacts/verification*.json
 artifacts/verification*/
 artifacts/verification*.patch
 artifacts/verification*.txt
+artifacts/verification*.npz
 artifacts/evaluation*.json.tmp
 artifacts/atlas-preflight.json
